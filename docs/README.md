@@ -1,1 +1,1 @@
-# I think you're cool dot com
+# I think you're dot cool
