@@ -1,0 +1,25 @@
+{
+  "name": "ity.cool",
+  "version": "0.0.0",
+  "description": "I think you're dot cool",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "node server.js 2718"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dtudury/ity.cool.git"
+  },
+  "author": "David Tudury <david.tudury@gmail.com>",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/dtudury/ity.cool/issues"
+  },
+  "homepage": "https://github.com/dtudury/ity.cool#readme",
+  "devDependencies": {
+    "express": "^4.17.1"
+  }
+}

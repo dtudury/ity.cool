@@ -79,8 +79,8 @@ function redraw() {
   triangleVertices[1] = Math.sin(Date.now() / 1000)
   triangleVertices[5] = triangleVertices[6] = Math.sin(Date.now() / 1200)
   triangleVertices[10] = -(triangleVertices[11] = Math.sin(Date.now() / 1300))
-  gl.bufferData(gl.ARRAY_BUFFER, triangleVertices, gl.STATIC_DRAW)
-  gl.clearColor(0.5, 0.5, 0.5, 1.0)
+  gl.bufferData(gl.ARRAY_BUFFER, triangleVertices, gl.DYNAMIC_DRAW)
+  gl.clearColor(0.25, 0.75, 1.0, 1.0)
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
   // Main render loop
