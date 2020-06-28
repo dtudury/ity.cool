@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/dtudury/ity.cool#readme",
   "devDependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "standard": "^14.3.4"
   }
 }
