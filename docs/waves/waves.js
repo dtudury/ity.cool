@@ -12,14 +12,6 @@ while (document.body.lastChild) {
 }
 document.body.appendChild(canvas)
 
-function resizeCanvas () {
-  canvas.width = window.innerWidth
-  canvas.height = window.innerHeight
-  gl.viewport(0, 0, window.innerWidth, window.innerHeight)
-}
-window.addEventListener('resize', resizeCanvas, false)
-resizeCanvas()
-
 function createProgram (vertexShader, fragmentShader) {
   const program = gl.createProgram()
   gl.attachShader(program, vertexShader)
@@ -47,17 +39,49 @@ function createShader (type, source) {
 const program = createProgram(
   createShader(gl.VERTEX_SHADER, `
     precision mediump float;
-    uniform float u_time;
+    uniform vec2 resolution;
+    uniform float time;
     attribute vec2 vertPosition;
     varying vec4 fragColor;
     void main() {
+      float x = vertPosition.x - resolution.x * 0.5;
+      float y = vertPosition.y - resolution.y * 0.5;
+      float r = 0.0;
+      float g = 0.0;
+      float b = 0.0;
+      float w = 0.7;
+      float t = 1.0;
+      for (int i = 0; i < 27; i++) {
+        float offsetTime = time + 100000.0 * float(i);
+        float c1 = sin((offsetTime / (w * 10.0) + (sin(t) * x + cos(t) * y) / 100.0) * w) / w;
+        c1 += sin((offsetTime / (w * 10.0) + (sin(-t) * x + cos(t) * y) / 100.0) * w) / w;
+        offsetTime += 1000.0;
+        float c2 = sin((offsetTime / (w * 10.0) + (sin(t) * x + cos(t) * y) / 100.0) * w) / w;
+        c2 += sin((offsetTime / (w * 10.0) + (sin(-t) * x + cos(t) * y) / 100.0) * w) / w;
+        offsetTime += 3000.0;
+        float c3 = sin((offsetTime / (w * 10.0) + (sin(t) * x + cos(t) * y) / 100.0) * w) / w;
+        c3 += sin((offsetTime / (w * 10.0) + (sin(-t) * x + cos(t) * y) / 100.0) * w) / w;
+        r += c1;
+        g += c2;
+        b += c3;
+        w = w * 1.14;
+        t = mod(t * 2.0, 2.0 * 3.1415926538);
+      }
+      r = sin(r) * 0.5 + 0.4;
+      g = sin(g) * 0.5 + 0.4;
+      b = sin(b) * 0.5 + 0.4;
       fragColor = vec4(
-        (sin(vertPosition.x * 5.0) + 1.0) * 0.5, 
-        (sin(vertPosition.y * 5.0) + 1.0) * 0.5, 
-        (sin(u_time) + 1.0) * 0.5, 
+        r,
+        g,
+        b,
         1.0
       );
-      gl_Position = vec4(vertPosition, 0.0, 1.0);
+      gl_Position = vec4(
+        2.0 * vertPosition.x / resolution.x - 1.0,
+        -2.0 * vertPosition.y / resolution.y + 1.0,
+        0.0,
+        1.0
+      );
     }
   `),
   createShader(gl.FRAGMENT_SHADER, `
@@ -70,32 +94,52 @@ const program = createProgram(
 )
 gl.useProgram(program)
 
-const triangleVertices = new Float32Array([
-  0.0, 1.0,
-  -0.1, -1.0,
-  0.1, -1.0,
-  0.0, 1.0,
-  -0.1, -1.0,
-  0.1, -1.0
-])
+let vertices
 
 const triangleVertexBufferObject = gl.createBuffer()
 gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexBufferObject)
 const positionAttribLocation = gl.getAttribLocation(program, 'vertPosition')
 gl.vertexAttribPointer(positionAttribLocation, 2, gl.FLOAT, gl.FALSE, 2 * Float32Array.BYTES_PER_ELEMENT, 0)
 gl.enableVertexAttribArray(positionAttribLocation)
-const timeLocation = gl.getUniformLocation(program, 'u_time')
+const timeLocation = gl.getUniformLocation(program, 'time')
+const resolutionLocation = gl.getUniformLocation(program, 'resolution')
+
+function resizeCanvas () {
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight
+  const xStep = 8
+  const yStep = xStep * Math.sqrt(3) / 2
+  vertices = []
+  for (let x = 0; x < canvas.width + xStep / 2; x += xStep) {
+    for (let y = 0; y < canvas.height; y += yStep * 2) {
+      vertices.push([
+        x, y,
+        x + xStep / 2, y + yStep,
+        x - xStep / 2, y + yStep,
+        x + xStep / 2, y + yStep,
+        x - xStep / 2, y + yStep,
+        x, y + yStep * 2,
+        x, y,
+        x + xStep, y,
+        x + xStep / 2, y + yStep,
+        x + xStep / 2, y + yStep,
+        x + xStep, y + yStep * 2,
+        x, y + yStep * 2
+      ])
+    }
+  }
+  vertices = vertices.flat()
+  console.log(vertices.length / 3)
+  gl.viewport(0, 0, window.innerWidth, window.innerHeight)
+  gl.uniform2f(resolutionLocation, gl.canvas.width, gl.canvas.height)
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
+}
+window.addEventListener('resize', resizeCanvas, false)
+resizeCanvas()
 
 function redraw () {
-  const t = Date.now()
-  gl.uniform1f(timeLocation, (t % 0x10000000) / 1000)
-  triangleVertices[1] = Math.sin(t / 1000)
-  triangleVertices[2] = triangleVertices[3] = Math.sin(t / 1200)
-  triangleVertices[4] = -(triangleVertices[5] = Math.sin(t / 1300))
-  gl.bufferData(gl.ARRAY_BUFFER, triangleVertices, gl.DYNAMIC_DRAW)
-  gl.clearColor(0.25, 0.75, 1.0, 1.0)
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-  gl.drawArrays(gl.TRIANGLES, 0, 6)
+  gl.uniform1f(timeLocation, (Date.now() % 0x100000000) * 0.005)
+  gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2)
   window.requestAnimationFrame(redraw)
 }
 redraw()
