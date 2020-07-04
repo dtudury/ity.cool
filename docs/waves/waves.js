@@ -38,7 +38,7 @@ function createShader (type, source) {
 
 const program = createProgram(
   createShader(gl.VERTEX_SHADER, `
-    precision mediump float;
+    precision lowp float;
     uniform vec2 resolution;
     uniform float time;
     attribute vec2 vertPosition;
@@ -49,31 +49,26 @@ const program = createProgram(
       float r = 0.0;
       float g = 0.0;
       float b = 0.0;
-      float w = 0.7;
-      float t = 1.0;
-      for (int i = 0; i < 27; i++) {
-        float offsetTime = time + 100000.0 * float(i);
-        float c1 = sin((offsetTime / (w * 10.0) + (sin(t) * x + cos(t) * y) / 100.0) * w) / w;
-        c1 += sin((offsetTime / (w * 10.0) + (sin(-t) * x + cos(t) * y) / 100.0) * w) / w;
-        offsetTime += 1000.0;
-        float c2 = sin((offsetTime / (w * 10.0) + (sin(t) * x + cos(t) * y) / 100.0) * w) / w;
-        c2 += sin((offsetTime / (w * 10.0) + (sin(-t) * x + cos(t) * y) / 100.0) * w) / w;
-        offsetTime += 3000.0;
-        float c3 = sin((offsetTime / (w * 10.0) + (sin(t) * x + cos(t) * y) / 100.0) * w) / w;
-        c3 += sin((offsetTime / (w * 10.0) + (sin(-t) * x + cos(t) * y) / 100.0) * w) / w;
-        r += c1;
-        g += c2;
-        b += c3;
-        w = w * 1.14;
-        t = mod(t * 2.0, 2.0 * 3.1415926538);
+      float f = ${2 * Math.PI} / 820.0;
+      float v = 1.0;
+      float amp = 0.5;
+      float angle = 0.0;
+      for (int i = 0; i < 20; i++) {
+        r += amp * sin((time + 0.3) * v + f * (sin(angle) * x + cos(angle) * y));
+        g += amp * sin((time + 0.5) * v + f * (sin(angle) * x + cos(angle) * y));
+        b += amp * sin((time + 0.0) * v + f * (sin(angle) * x + cos(angle) * y));
+        f = f * 1.1;
+        v = v * 1.1;
+        amp = amp * 0.9;
+        angle = mod(angle * 2.0 + 10.0, ${2 * Math.PI});
       }
-      r = sin(r) * 0.5 + 0.4;
-      g = sin(g) * 0.5 + 0.4;
-      b = sin(b) * 0.5 + 0.4;
+      r = sin(r);
+      g = sin(g);
+      b = sin(b);
       fragColor = vec4(
         r,
         g,
-        b,
+        r + b,
         1.0
       );
       gl_Position = vec4(
@@ -85,7 +80,7 @@ const program = createProgram(
     }
   `),
   createShader(gl.FRAGMENT_SHADER, `
-    precision mediump float;
+    precision lowp float;
     varying vec4 fragColor;
     void main() {
       gl_FragColor = fragColor;
@@ -107,11 +102,11 @@ const resolutionLocation = gl.getUniformLocation(program, 'resolution')
 function resizeCanvas () {
   canvas.width = window.innerWidth
   canvas.height = window.innerHeight
-  const xStep = 8
+  const xStep = 5
   const yStep = xStep * Math.sqrt(3) / 2
   vertices = []
   for (let x = 0; x < canvas.width + xStep / 2; x += xStep) {
-    for (let y = 0; y < canvas.height; y += yStep * 2) {
+    for (let y = 0; y < canvas.height - yStep; y += yStep * 2) {
       vertices.push([
         x, y,
         x + xStep / 2, y + yStep,
@@ -137,9 +132,9 @@ function resizeCanvas () {
 window.addEventListener('resize', resizeCanvas, false)
 resizeCanvas()
 
-function redraw () {
-  gl.uniform1f(timeLocation, (Date.now() % 0x100000000) * 0.005)
+function redraw (time) {
+  gl.uniform1f(timeLocation, (time / 1000))
   gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2)
   window.requestAnimationFrame(redraw)
 }
-redraw()
+redraw(0)
