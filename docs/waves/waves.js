@@ -68,7 +68,7 @@ const program = createProgram(
       fragColor = vec4(
         1.0 - 10.0 * r,
         1.0 - 10.0 * g,
-        1.0 - 10.0 * b,
+        3.0 - 30.0 * b,
         1.0
       );
       gl_Position = vec4(
