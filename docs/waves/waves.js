@@ -50,25 +50,25 @@ const program = createProgram(
       float g = 0.0;
       float b = 0.0;
       float f = ${2 * Math.PI} / 820.0;
-      float v = 1.0;
+      float v = 0.5;
       float amp = 0.5;
       float angle = 0.0;
       for (int i = 0; i < 20; i++) {
-        r += amp * sin((time + 0.3) * v + f * (sin(angle) * x + cos(angle) * y));
-        g += amp * sin((time + 0.5) * v + f * (sin(angle) * x + cos(angle) * y));
-        b += amp * sin((time + 0.0) * v + f * (sin(angle) * x + cos(angle) * y));
+        r += amp * sin((time + 0.0) * v + f * (sin(angle) * x + cos(angle) * y));
+        g += amp * sin((time + 0.3) * v + f * (sin(angle) * x + cos(angle) * y));
+        b += amp * sin((time + 0.6) * v + f * (sin(angle) * x + cos(angle) * y));
         f = f * 1.1;
         v = v * 1.1;
         amp = amp * 0.9;
         angle = mod(angle * 2.0 + 10.0, ${2 * Math.PI});
       }
-      r = sin(r);
-      g = sin(g);
-      b = sin(b);
+      r = sin(r) * 0.5 + 0.5;
+      g = sin(g) * 0.5 + 0.5;
+      b = sin(b) * 0.5 + 0.5;
       fragColor = vec4(
-        r,
-        g,
-        r + b,
+        1.0 - 10.0 * r,
+        1.0 - 10.0 * g,
+        1.0 - 10.0 * b,
         1.0
       );
       gl_Position = vec4(
