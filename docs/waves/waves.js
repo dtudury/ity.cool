@@ -132,9 +132,9 @@ function resizeCanvas () {
 window.addEventListener('resize', resizeCanvas, false)
 resizeCanvas()
 
-function redraw (time) {
-  gl.uniform1f(timeLocation, (time / 1000))
+function redraw () {
+  gl.uniform1f(timeLocation, (Date.now() / 1000) % 0x1000000)
   gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2)
   window.requestAnimationFrame(redraw)
 }
-redraw(0)
+redraw()
