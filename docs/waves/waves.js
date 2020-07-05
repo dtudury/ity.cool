@@ -38,20 +38,20 @@ const model = window.model = proxy(
   }
   */
   {
-    waves: 10,
+    waves: 30,
     fStart: 0.01,
-    vStart: 2.4,
-    ampStart: 0.5,
-    angleStart: 1,
-    fScale: 1.2,
-    vScale: 0.9,
-    ampScale: 0.85,
-    angleScale: 12,
+    vStart: 1.0,
+    ampStart: 0.4,
+    angleStart: 3,
+    fScale: 1.15,
+    vScale: 1.05,
+    ampScale: 0.90,
+    angleScale: 2,
     startRGB: { r: 0, g: 0, b: 0 },
-    offsetRGB: { r: 20.2, g: 0.0, b: 10.1 },
-    rMapping: [-9, 0, 0, 9],
-    gMapping: [0, -9, 0, 9],
-    bMapping: [0, 0, -9, 9]
+    offsetRGB: { r: 20, g: 0, b: 10 },
+    rMapping: [1.2, 0, 0, 0.2],
+    gMapping: [0, 1.2, 0, 0.2],
+    bMapping: [0, 0, 1.2, 0.2]
   }
 )
 
