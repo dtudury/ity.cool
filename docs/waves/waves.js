@@ -38,6 +38,23 @@ const model = window.model = proxy(
   }
   */
   {
+    waves: 13,
+    fStart: 0.02,
+    vStart: 2.4,
+    ampStart: 0.9,
+    angleStart: 1,
+    fScale: 1.05,
+    vScale: 0.97,
+    ampScale: 0.97,
+    angleScale: 2.1,
+    startRGB: { r: 0, g: 0, b: 0 },
+    offsetRGB: { r: 0.4, g: 0.8, b: 0 },
+    rMapping: [-15, -5, -5, 10],
+    bMapping: [-5, 0, -5, 9],
+    gMapping: [0, -5, 0, 4]
+  }
+  /*
+  {
     waves: 30,
     fStart: 0.01,
     vStart: 1.0,
@@ -53,6 +70,7 @@ const model = window.model = proxy(
     gMapping: [0, 1.2, 0, 0.2],
     bMapping: [0, 0, 1.2, 0.2]
   }
+  */
 )
 
 render(document.body, h`
