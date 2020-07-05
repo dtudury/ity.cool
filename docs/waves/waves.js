@@ -1,16 +1,68 @@
-const canvas = document.createElement('canvas')
+import { h, render, proxy, watchFunction } from './horseless.0.5.1.min.esm.js' // '/unpkg/horseless/horseless.js'
+
+const model = window.model = proxy(
+  /*
+  {
+    waves: 18,
+    fStart: 0.02,
+    vStart: 0.4,
+    ampStart: 0.9,
+    angleStart: 1.5,
+    fScale: 1.05,
+    vScale: 1.25,
+    ampScale: 0.85,
+    angleScale: 1.1,
+    startRGB: { r: 0.4, g: 0.2, b: 0 },
+    offsetRGB: { r: 0.20, g: 0.10, b: 0 },
+    rMapping: [-10, 0, 0, 1],
+    gMapping: [0, -10, 0, 1],
+    bMapping: [0, 0, -10, 1]
+  }
+  */
+  /*
+  {
+    waves: 13,
+    fStart: 0.02,
+    vStart: 2.4,
+    ampStart: 0.9,
+    angleStart: 1,
+    fScale: 1.05,
+    vScale: 0.9,
+    ampScale: 0.85,
+    angleScale: 2.1,
+    startRGB: { r: 2, g: 4, b: 0 },
+    offsetRGB: { r: 0, g: 0, b: 0 },
+    rMapping: [0, 5, 5, -4.5],
+    gMapping: [5, 5, 5, -4.5],
+    bMapping: [5, 5, 0, -4.5]
+  }
+  */
+  {
+    waves: 10,
+    fStart: 0.01,
+    vStart: 2.4,
+    ampStart: 0.5,
+    angleStart: 1,
+    fScale: 1.2,
+    vScale: 0.9,
+    ampScale: 0.85,
+    angleScale: 12,
+    startRGB: { r: 0, g: 0, b: 0 },
+    offsetRGB: { r: 20.2, g: 0.0, b: 10.1 },
+    rMapping: [-9, 0, 0, 9],
+    gMapping: [0, -9, 0, 9],
+    bMapping: [0, 0, -9, 9]
+  }
+)
+
+render(document.body, h`
+  <canvas style="display: block;"/>
+`)
+const canvas = document.querySelector('canvas')
 const gl = canvas.getContext('webgl')
 if (!gl) {
   console.error('no webgl?!')
 }
-
-canvas.style.display = 'block'
-document.body.appendChild(canvas)
-document.body.style.margin = 0
-while (document.body.lastChild) {
-  document.body.removeChild(document.body.lastChild)
-}
-document.body.appendChild(canvas)
 
 function createProgram (vertexShader, fragmentShader) {
   const program = gl.createProgram()
@@ -41,34 +93,52 @@ const program = createProgram(
     precision lowp float;
     uniform vec2 resolution;
     uniform float time;
+    uniform int waves;
+    uniform float fStart;
+    uniform float vStart;
+    uniform float ampStart;
+    uniform float angleStart;
+    uniform float fScale;
+    uniform float vScale;
+    uniform float ampScale;
+    uniform float angleScale;
+    uniform vec3 startRGB;
+    uniform vec3 offsetRGB;
+    uniform vec4 rMapping;
+    uniform vec4 gMapping;
+    uniform vec4 bMapping;
     attribute vec2 vertPosition;
     varying vec4 fragColor;
     void main() {
       float x = vertPosition.x - resolution.x * 0.5;
       float y = vertPosition.y - resolution.y * 0.5;
-      float r = 0.0;
-      float g = 0.0;
-      float b = 0.0;
-      float f = ${2 * Math.PI} / 820.0;
-      float v = 0.5;
-      float amp = 0.5;
-      float angle = 0.0;
-      for (int i = 0; i < 20; i++) {
-        r += amp * sin((time + 0.0) * v + f * (sin(angle) * x + cos(angle) * y));
-        g += amp * sin((time + 0.3) * v + f * (sin(angle) * x + cos(angle) * y));
-        b += amp * sin((time + 0.6) * v + f * (sin(angle) * x + cos(angle) * y));
-        f = f * 1.1;
-        v = v * 1.1;
-        amp = amp * 0.9;
-        angle = mod(angle * 2.0 + 10.0, ${2 * Math.PI});
+      float r = startRGB.r;
+      float g = startRGB.g;
+      float b = startRGB.b;
+      float f = fStart;
+      float v = vStart;
+      float amp = ampStart;
+      float angle = angleStart;
+      for (int i = 0; i < 100; i++) {
+        if (i > waves) {
+          break;
+        }
+        float t = time + float(i);
+        r += amp * sin((t + offsetRGB.r) * v + f * (sin(angle) * x + cos(angle) * y));
+        g += amp * sin((t + offsetRGB.g) * v + f * (sin(angle) * x + cos(angle) * y));
+        b += amp * sin((t + offsetRGB.b) * v + f * (sin(angle) * x + cos(angle) * y));
+        f = f * fScale;
+        v = v * vScale;
+        amp = amp * ampScale;
+        angle = mod(angle * angleScale, ${2 * Math.PI});
       }
       r = sin(r) * 0.5 + 0.5;
       g = sin(g) * 0.5 + 0.5;
       b = sin(b) * 0.5 + 0.5;
       fragColor = vec4(
-        1.0 - 10.0 * r,
-        1.0 - 10.0 * g,
-        3.0 - 30.0 * b,
+        rMapping[3] + rMapping.r * r + rMapping.g * g + rMapping.b * b,
+        gMapping[3] + gMapping.r * r + gMapping.g * g + gMapping.b * b,
+        bMapping[3] + bMapping.r * r + bMapping.g * g + bMapping.b * b,
         1.0
       );
       gl_Position = vec4(
@@ -98,6 +168,20 @@ gl.vertexAttribPointer(positionAttribLocation, 2, gl.FLOAT, gl.FALSE, 2 * Float3
 gl.enableVertexAttribArray(positionAttribLocation)
 const timeLocation = gl.getUniformLocation(program, 'time')
 const resolutionLocation = gl.getUniformLocation(program, 'resolution')
+const wavesLocation = gl.getUniformLocation(program, 'waves')
+const fStartLocation = gl.getUniformLocation(program, 'fStart')
+const vStartLocation = gl.getUniformLocation(program, 'vStart')
+const ampStartLocation = gl.getUniformLocation(program, 'ampStart')
+const angleStartLocation = gl.getUniformLocation(program, 'angleStart')
+const fScaleLocation = gl.getUniformLocation(program, 'fScale')
+const vScaleLocation = gl.getUniformLocation(program, 'vScale')
+const ampScaleLocation = gl.getUniformLocation(program, 'ampScale')
+const angleScaleLocation = gl.getUniformLocation(program, 'angleScale')
+const startRGBLocation = gl.getUniformLocation(program, 'startRGB')
+const offsetRGBLocation = gl.getUniformLocation(program, 'offsetRGB')
+const rMappingLocation = gl.getUniformLocation(program, 'rMapping')
+const gMappingLocation = gl.getUniformLocation(program, 'gMapping')
+const bMappingLocation = gl.getUniformLocation(program, 'bMapping')
 
 function resizeCanvas () {
   canvas.width = window.innerWidth
@@ -124,7 +208,6 @@ function resizeCanvas () {
     }
   }
   vertices = vertices.flat()
-  console.log(vertices.length / 3)
   gl.viewport(0, 0, window.innerWidth, window.innerHeight)
   gl.uniform2f(resolutionLocation, gl.canvas.width, gl.canvas.height)
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
@@ -132,9 +215,27 @@ function resizeCanvas () {
 window.addEventListener('resize', resizeCanvas, false)
 resizeCanvas()
 
-function redraw () {
-  gl.uniform1f(timeLocation, (Date.now() / 1000) % 0x1000000)
+watchFunction(() => {
+  gl.uniform1i(wavesLocation, model.waves)
+  gl.uniform1f(fStartLocation, model.fStart)
+  gl.uniform1f(vStartLocation, model.vStart)
+  gl.uniform1f(ampStartLocation, model.ampStart)
+  gl.uniform1f(angleStartLocation, model.angleStart)
+  gl.uniform1f(fScaleLocation, model.fScale)
+  gl.uniform1f(vScaleLocation, model.vScale)
+  gl.uniform1f(ampScaleLocation, model.ampScale)
+  gl.uniform1f(angleScaleLocation, model.angleScale)
+  gl.uniform3f(startRGBLocation, model.startRGB.r, model.startRGB.g, model.startRGB.b)
+  gl.uniform3f(offsetRGBLocation, model.offsetRGB.r, model.offsetRGB.g, model.offsetRGB.b)
+  gl.uniform4f(rMappingLocation, ...model.rMapping)
+  gl.uniform4f(gMappingLocation, ...model.gMapping)
+  gl.uniform4f(bMappingLocation, ...model.bMapping)
+})
+
+function redraw (t) {
+  const time = (t / 1000) % 0x10000
+  gl.uniform1f(timeLocation, time)
   gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2)
   window.requestAnimationFrame(redraw)
 }
-redraw()
+redraw(0)
