@@ -1,8 +1,9 @@
-import { h, render, proxy, watchFunction } from './horseless.0.5.1.min.esm.js' // '/unpkg/horseless/horseless.js'
+import { h, render, proxy, watchFunction, mapEntries } from './horseless.0.5.1.min.esm.js' // '/unpkg/horseless/horseless.js'
 
-const model = window.model = proxy(
-  /*
-  {
+const model = window.model = proxy({})
+const examples = {
+  'flame rings': {
+    cellSize: 5,
     waves: 18,
     fStart: 0.02,
     vStart: 0.4,
@@ -17,10 +18,9 @@ const model = window.model = proxy(
     rMapping: [-10, 0, 0, 1],
     gMapping: [0, -10, 0, 1],
     bMapping: [0, 0, -10, 1]
-  }
-  */
-  /*
-  {
+  },
+  'sunny side up': {
+    cellSize: 5,
     waves: 13,
     fStart: 0.02,
     vStart: 2.4,
@@ -35,9 +35,9 @@ const model = window.model = proxy(
     rMapping: [0, 5, 5, -4.5],
     gMapping: [5, 5, 5, -4.5],
     bMapping: [5, 5, 0, -4.5]
-  }
-  */
-  {
+  },
+  'lava lamp (default)': {
+    cellSize: 5,
     waves: 13,
     fStart: 0.02,
     vStart: 2.4,
@@ -52,9 +52,9 @@ const model = window.model = proxy(
     rMapping: [-15, -5, -5, 10],
     bMapping: [-5, 0, -5, 9],
     gMapping: [0, -5, 0, 4]
-  }
-  /*
-  {
+  },
+  'unicorn farts': {
+    cellSize: 5,
     waves: 30,
     fStart: 0.01,
     vStart: 1.0,
@@ -70,11 +70,35 @@ const model = window.model = proxy(
     gMapping: [0, 1.2, 0, 0.2],
     bMapping: [0, 0, 1.2, 0.2]
   }
-  */
-)
+}
+
+function setFromHash () {
+  Object.assign(model, examples['lava lamp (default)'])
+  if (document.location.hash) {
+    try {
+      const hash = JSON.parse(unescape(document.location.hash.substring(1)))
+      Object.assign(model, hash)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+}
+setFromHash()
+
+window.addEventListener('hashchange', setFromHash)
 
 render(document.body, h`
   <canvas style="display: block;"/>
+  <details>
+    <summary>details</summary>
+    TODO: Put some controls here to edit inputs. In the meantime, here's some examples:
+    <ul>
+    ${mapEntries(examples, (value, name) => {
+      return h`<li><a href="#${escape(JSON.stringify(value))}">${name}</a></li>`
+    })}
+    </ul>
+    The model is global and "live" so if you wanted to open the console and start editing properties on model, things would change (including the url)
+  </details>
 `)
 const canvas = document.querySelector('canvas')
 const gl = canvas.getContext('webgl')
@@ -204,11 +228,11 @@ const bMappingLocation = gl.getUniformLocation(program, 'bMapping')
 function resizeCanvas () {
   canvas.width = window.innerWidth
   canvas.height = window.innerHeight
-  const xStep = 5
+  const xStep = model.cellSize
   const yStep = xStep * Math.sqrt(3) / 2
   vertices = []
   for (let x = 0; x < canvas.width + xStep / 2; x += xStep) {
-    for (let y = 0; y < canvas.height - yStep; y += yStep * 2) {
+    for (let y = 0; y < canvas.height; y += yStep * 2) {
       vertices.push([
         x, y,
         x + xStep / 2, y + yStep,
@@ -231,9 +255,9 @@ function resizeCanvas () {
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
 }
 window.addEventListener('resize', resizeCanvas, false)
-resizeCanvas()
 
 watchFunction(() => {
+  resizeCanvas()
   gl.uniform1i(wavesLocation, model.waves)
   gl.uniform1f(fStartLocation, model.fStart)
   gl.uniform1f(vStartLocation, model.vStart)
@@ -248,6 +272,7 @@ watchFunction(() => {
   gl.uniform4f(rMappingLocation, ...model.rMapping)
   gl.uniform4f(gMappingLocation, ...model.gMapping)
   gl.uniform4f(bMappingLocation, ...model.bMapping)
+  document.location.hash = escape(JSON.stringify(model))
 })
 
 function redraw (t) {
