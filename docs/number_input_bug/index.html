@@ -1,0 +1,30 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <title>chrome number input bug</title>
+  <meta charset="utf-8">
+</head>
+
+<body>
+  use the built-in increment button in a number input
+  <br>
+  min has an unexpected side effect on incrementing the value
+  <br>
+  <br>
+  <input type="number" value="1" min="0.5" max="2" step="1"> step size: 1, max: 2, increment button expected result: 2, actual result: 1.5
+  <br>
+  <input type="number" value="1" min="0.5" max="2" step="1.4"> step size: 1.4, max: 2, increment button expected result: 2, actual result: 1.9
+  <br>
+  <input type="number" value="1" min="0.5" max="2" step="1.6"> step size: 1.6, max: 2, increment button expected result: 2, actual result: 0.5
+  <br>
+  <br>
+  <input type="number" value="10" min="5" max="20" step="10"> step size: 10, max: 20, increment button expected result: 20, actual result: 15
+  <br>
+  <input type="number" value="10" min="5" max="20" step="14"> step size: 14, max: 20, increment button expected result: 20, actual result: 19
+  <br>
+  <input type="number" value="10" min="5" max="20" step="16"> step size: 16, max: 20, increment button expected result: 20, actual result: 5
+</body>
+
+</html>
