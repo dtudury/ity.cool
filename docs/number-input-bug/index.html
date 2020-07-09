@@ -29,6 +29,10 @@
   <input type="number" value="10" min="5" max="20" step="14"> step size: 14, actual result: 19
   <br>
   <input type="number" value="10" min="5" max="20" step="16"> step size: 16, actual result: 5
+  <br>
+  <br>
+  I tested it on firefox and it does something similar (except incrementing never decreases the value). 
+  Now I'm guessing there's some w3 spec that mandates this weirdness. It didn't occur to me before submitting that it might not be a bug, sorry if this is a "working as designed" bug.
 </body>
 
 </html>
