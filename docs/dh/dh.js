@@ -6,22 +6,24 @@ const model = window.model = proxy({
 })
 
 function stepToCommand (prefix, step) {
-  const steps = model.modulus - 1
-  const angle = 2 * Math.PI * ((step - 0.5) / steps - 0.25)
+  const steps = model.modulus
+  const angle = 2 * Math.PI * (step / steps - 0.25)
   return `${prefix}${100 * Math.cos(angle)} ${100 * Math.sin(angle)}`
 }
 
 function pathData () {
+  const modulus = model.modulus
+  const base = model.base % modulus
   const commands = []
   let prefix = 'M'
-  let step = model.base
+  let step = base
   let count = 0
   do {
     count++
     commands.push(stepToCommand(prefix, step))
-    step = step * model.base % model.modulus
+    step = step * base % modulus
     prefix = 'L'
-  } while (step !== model.base)
+  } while (step !== base)
   console.log(count)
   return commands.join('') + 'Z'
 }
