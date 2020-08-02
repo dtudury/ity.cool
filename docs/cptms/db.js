@@ -42,7 +42,7 @@ export async function syncList (model) {
         oldList.forEach(repoName => {
           delete model.repoMap[repoName]
         })
-        setTimeout(() => syncList(model), 0)
+        setTimeout(() => syncList(model), 1000)
       }
     })
   })
