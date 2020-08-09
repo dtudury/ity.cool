@@ -1,8 +1,10 @@
+import { model } from './model.js'
 
 const dbPromise = new Promise((resolve, reject) => {
   Object.assign(window.indexedDB.open('crptptms'), {
     onupgradeneeded: function (event) {
       event.target.result.createObjectStore('repos')
+      event.target.result.createObjectStore('data')
     },
     onsuccess: function (event) {
       resolve(event.target.result)
@@ -15,47 +17,60 @@ const dbPromise = new Promise((resolve, reject) => {
 })
 
 export async function createRandom () {
-  const name = 'temp_' + ('0000000000000000' + (Math.random() * 0x10000000000000).toString(16).toUpperCase()).substr(-16)
+  const array = new Uint8Array(16)
+  window.crypto.getRandomValues(array)
+  let str = ''
+  for (let i = 0; i < 16; i++) {
+    str = str + String.fromCharCode(array[i])
+  }
+  const name = window.btoa(str)
+  // const name = array.reduce((prev, curr) => prev + String.fromCharCode(curr), '')
   dbPromise.then(db => {
-    Object.assign(db.transaction(['repos'], 'readwrite').objectStore('repos').put(['asdf', new ArrayBuffer(10)], name), {
+    Object.assign(db.transaction(['repos'], 'readwrite').objectStore('repos').put({}, name), {
       onsuccess: e => {
-        console.log(e)
+        syncList()
       },
       onerror: e => {
         console.error('error', e)
-      }
-    })
-  })
-}
-
-export async function syncList (model) {
-  dbPromise.then(db => {
-    Object.assign(db.transaction(['repos']).objectStore('repos').getAllKeys(), {
-      onsuccess: function (event) {
-        const newList = new Set(event.target.result)
-        const oldList = new Set(model.repoList)
-        model.repoList = event.target.result
-        newList.forEach(repoName => {
-          model.repoMap[repoName] = model.repoMap[repoName] || { expanded: false, updated: false }
-          oldList.delete(repoName)
-        })
-        oldList.forEach(repoName => {
-          delete model.repoMap[repoName]
-        })
-        setTimeout(() => syncList(model), 1000)
       }
     })
   })
 }
 
 export const deleteRepo = name => el => e => {
+  e.stopPropagation()
   dbPromise.then(db => {
     Object.assign(db.transaction(['repos'], 'readwrite').objectStore('repos').delete(name), {
       onsuccess: e => {
-        console.log(e)
+        syncList()
       },
       onerror: e => {
         console.error('error', e)
+      }
+    })
+  })
+}
+
+let nextSync
+export async function syncList () {
+  clearTimeout(nextSync)
+  nextSync = false
+  dbPromise.then(db => {
+    Object.assign(db.transaction(['repos']).objectStore('repos').getAllKeys(), {
+      onsuccess: function (event) {
+        model.repoList = event.target.result
+        nextSync = setTimeout(() => syncList(), 5000)
+      }
+    })
+  })
+}
+
+export async function readRoot (name) {
+  dbPromise.then(db => {
+    Object.assign(db.transaction(['repos']).objectStore('repos').get(name), {
+      onsuccess: function (event) {
+        model.repos[name] = event.target.result
+        nextSync = setTimeout(() => syncList(), 5000)
       }
     })
   })

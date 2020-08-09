@@ -1,32 +1,63 @@
-import { h, mapEntries } from './horseless.js'
+import { h, proxy, mapEntries } from './horseless.js'
 import octicons from './octicons.js'
 import { dynamic } from './nodes.js'
-import { syncList, deleteRepo, createRandom } from './db.js'
+import { syncList, deleteRepo, createRandom, readRoot } from './db.js'
 
-const toggleExpanded = model => el => e => {
-  model.expanded = !model.expanded
+const onclick = (model, name) => el => e => {
+  if (model.repos[name]) {
+    delete model.repos[name]
+  } else {
+    readRoot(name)
+  }
+}
+const onmouseover = uiState => el => e => {
+  uiState.hover = true
+}
+const onmouseout = uiState => el => e => {
+  uiState.hover = false
+}
+const oncontextmenu = uiState => el => e => {
+  console.log('context menu')
 }
 export default function ({ model }) {
-  model.repoMap = model.repoMap || {}
-  syncList(model)
+  syncList()
   function nameToRepo (name) {
-    const content = model.repoMap[name]
+    const uiState = proxy({ expanded: false, hover: false })
     return h`
-      <div style="display: flex; align-items: center; justify-content: space-between;">
-        <span onclick=${toggleExpanded(content)} style="display: inline-flex; align-items: center;">
-          ${() => content.expanded ? octicons('chevron-down-16') : octicons('chevron-right-16')}
+      <div 
+        onmouseover=${onmouseover(uiState)} 
+        onmouseout=${onmouseout(uiState)} 
+        oncontextmenu=${oncontextmenu(uiState)} 
+        onclick=${onclick(model, name)} 
+        style="
+          display: flex; 
+          align-items: center; 
+          justify-content: space-between; 
+          background: ${() => uiState.hover ? 'AliceBlue' : 'LightGray'}
+        "
+      >
+        <span 
+          style="display: inline-flex; align-items: center;"
+        >
+          ${() => model.repos[name] ? octicons('chevron-down-16') : octicons('chevron-right-16')}
           ${name}
         </span>
         <span style="display: inline-flex; align-items: center;">
-          <span onclick=${deleteRepo(name)}>${octicons('pencil-16')}</span>
-          <span onclick=${deleteRepo(name)}>${octicons('trashcan-16')}</span>
+          <button style="padding: 0; border: none; background: none;" onclick=${deleteRepo(name)}>${octicons('pencil-16')}</button>
+          <button style="padding: 0; border: none; background: none;" onclick=${deleteRepo(name)}>${octicons('trashcan-16')}</button>
         </span>
       </div>
-      <${dynamic} module="./repo.js" model=${content}/>
+      ${() => {
+        if (model.repos[name]) {
+          return h`<${dynamic} module="./repo.js" name=${name} model=${model.repos[name]}/>`
+        }
+      }}
     `
   }
   return h`
-    <div onclick=${el => createRandom}>${octicons('repo-16')} New</div>
+      < div style = "width: 300px; height: 100%; background: WhiteSmoke; overflow-y: scroll; overflow-x: auto" >
+        <div onclick=${el => createRandom}>${octicons('repo-16')} New</div>
     ${mapEntries(() => model.repoList, nameToRepo)}
-  `
+    </div >
+      `
 }

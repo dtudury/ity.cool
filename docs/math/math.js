@@ -58,7 +58,7 @@ function newProblem () {
   const a = numberFromRecipe()
   const op = OpFromRecipe()
   const b = numberFromRecipe()
-  let q = a + ' ' + op + ' ' + b
+  const q = a + ' ' + op + ' ' + b
   if (isDynamic && model.q === q) {
     return newProblem()
   }
