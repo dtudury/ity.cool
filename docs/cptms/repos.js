@@ -1,7 +1,7 @@
 import { h, proxy, mapEntries } from './horseless.js'
 import octicons from './octicons.js'
 import { dynamic } from './nodes.js'
-import { syncList, deleteRepo, createRandom, readRoot } from './db.js'
+import { deleteRepo, createRandom, readRoot } from './db.js'
 
 const onclick = (model, name) => el => e => {
   if (model.repos[name]) {
@@ -20,7 +20,6 @@ const oncontextmenu = uiState => el => e => {
   console.log('context menu')
 }
 export default function ({ model }) {
-  syncList()
   function nameToRepo (name) {
     const uiState = proxy({ expanded: false, hover: false })
     return h`
@@ -48,8 +47,9 @@ export default function ({ model }) {
         </span>
       </div>
       ${() => {
-        if (model.repos[name]) {
-          return h`<${dynamic} module="./repo.js" name=${name} model=${model.repos[name]}/>`
+        const repo = model.repos[name]
+        if (repo && repo.module) {
+          return h`<${dynamic} module=${repo.module} name=${name} model=${repo}/>`
         }
       }}
     `
