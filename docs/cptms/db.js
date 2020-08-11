@@ -1,10 +1,13 @@
 import { model } from './model.js'
 
+const _storesByName = {}
+
 const dbPromise = new Promise((resolve, reject) => {
   Object.assign(window.indexedDB.open('crptptms'), {
     onupgradeneeded: function (event) {
       event.target.result.createObjectStore('repos')
-      event.target.result.createObjectStore('data')
+      const dataObjectStore = event.target.result.createObjectStore('data', { autoIncrement: true })
+      dataObjectStore.put({ module: './repos.js' }, 0)
     },
     onsuccess: function (event) {
       resolve(event.target.result)
@@ -31,7 +34,21 @@ export async function createRandom () {
       iterations: 25000
     }, name), {
       onsuccess: e => {
+        console.log(e)
         syncList()
+      },
+      onerror: e => {
+        console.error('error', e)
+      }
+    })
+
+    Object.assign(db.transaction(['data'], 'readwrite').objectStore('data').put({
+      module: './repo.js',
+      salt,
+      iterations: 25000
+    }), {
+      onsuccess: e => {
+        console.log(e.target.result)
       },
       onerror: e => {
         console.error('error', e)
@@ -51,6 +68,20 @@ export const deleteRepo = name => el => e => {
         console.error('error', e)
       }
     })
+
+    console.log(_storesByName[name])
+    Object.assign(db.transaction(['data'], 'readwrite').objectStore('data').put({
+      module: './repo.js',
+      iterations: 25000,
+      name
+    }), {
+      onsuccess: e => {
+        console.log(e)
+      },
+      onerror: e => {
+        console.error('error', e)
+      }
+    })
   })
 }
 
@@ -61,6 +92,20 @@ export async function syncList () {
   dbPromise.then(db => {
     Object.assign(db.transaction(['repos']).objectStore('repos').getAllKeys(), {
       onsuccess: function (event) {
+        const names = event.target.result
+        for (const storeName in _storesByName) {
+          if (names.indexOf(storeName) === -1) {
+            delete _storesByName[storeName]
+          }
+        }
+        names.forEach((name, index) => {
+          if (!_storesByName[name]) {
+            _storesByName[name] = { data: null }
+          }
+          model.stores[index] = _storesByName[name]
+        })
+        model.stores.splice(names.length)
+
         event.target.result.forEach((value, index) => {
           model.repoList[index] = value
         })
@@ -77,6 +122,7 @@ export async function readRoot (name) {
     Object.assign(db.transaction(['repos']).objectStore('repos').get(name), {
       onsuccess: function (event) {
         model.repos[name] = event.target.result
+        _storesByName[name].data = event.target.result
       }
     })
   })

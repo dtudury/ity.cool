@@ -6,7 +6,9 @@ export default function ({ model }) {
   }
   return h`
     <div onclick=${onclick}>name ${() => model.v}</div>
-    <label for="pass">Password:</label>
-    <input type="password" id="pass" name="password">
+    <label>
+      Password:
+      <input type="password">
+    </label>
   `
 }
