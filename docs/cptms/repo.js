@@ -1,14 +1,9 @@
 import { h } from './horseless.js'
 
-export default function ({ model }) {
-  const onclick = el => e => {
-    model.v = model.v ? ++model.v : 1
-  }
+export default function ({ store }) {
   return h`
-    <div onclick=${onclick}>name ${() => model.v}</div>
-    <label>
-      Password:
-      <input type="password">
-    </label>
+    <div>
+      ${() => JSON.stringify(store)}
+    </div>
   `
 }

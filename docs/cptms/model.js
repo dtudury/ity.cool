@@ -1,13 +1,12 @@
 import { proxy } from './horseless.js'
+import { readObject } from './db.js'
 
 export const model = window.model = proxy({
   position: {
     width: 100,
     height: 100
   },
-  stores: [],
-  repos: {},
-  repoList: []
+  root: {}
 })
 
 const handleResize = e => {
@@ -16,3 +15,7 @@ const handleResize = e => {
 }
 window.addEventListener('resize', handleResize)
 handleResize()
+
+readObject().then(result => {
+  Object.assign(model.root, result)
+})
