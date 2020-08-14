@@ -20,7 +20,6 @@ export async function readObject (key = 0) {
   return dbPromise.then(db => new Promise((resolve, reject) => {
     Object.assign(db.transaction(['data']).objectStore('data').get(key), {
       onsuccess: event => {
-        console.log(event)
         resolve(event.target.result)
       },
       onerror: reject
@@ -32,7 +31,6 @@ export async function putObject (object, key) {
   return dbPromise.then(db => new Promise((resolve, reject) => {
     Object.assign(db.transaction(['data'], 'readwrite').objectStore('data').put(object, key), {
       onsuccess: event => {
-        console.log(event)
         resolve(event.target.result)
       },
       onerror: reject
