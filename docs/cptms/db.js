@@ -1,10 +1,7 @@
-export const ROOT_ADDRESS = 0
-
 const dbPromise = new Promise((resolve, reject) => {
   Object.assign(window.indexedDB.open('crptptms'), {
     onupgradeneeded: function (event) {
-      const dataObjectStore = event.target.result.createObjectStore('data', { autoIncrement: true })
-      dataObjectStore.put({ module: './root.js', created: Date.now(), stores: [] }, ROOT_ADDRESS)
+      event.target.result.createObjectStore('data', { autoIncrement: true })
     },
     onsuccess: function (event) {
       resolve(event.target.result)
