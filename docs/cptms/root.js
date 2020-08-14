@@ -6,11 +6,13 @@ import input from './components/input.js'
 import button from './components/button.js'
 import { mapEntries } from '../esm/0.5.1.min.js'
 
+function saveModel ({ module, stores, created }, address) {
+  stores = JSON.parse(JSON.stringify(stores))
+  const modified = Date.now()
+  putObject({ module, stores, created, modified }, address)
+}
+
 export default function ({ model, address }) {
-  const saveStores = e => {
-    model.modified = Date.now()
-    putObject(JSON.parse(JSON.stringify(model)), address)
-  }
   const saveStore = el => async e => {
     e.preventDefault()
     const formData = new window.FormData(el)
@@ -18,7 +20,7 @@ export default function ({ model, address }) {
     const address = await putObject({})
     delete model.makingNew
     model.stores.unshift({ name, address, created: Date.now() })
-    saveStores()
+    saveModel(model, address)
   }
   const newStore = el => e => {
     model.makingNew = true
@@ -28,7 +30,7 @@ export default function ({ model, address }) {
   }
   return h`
     <div style="width: 100%; height: 100%; display: flex; flex-direction: column; background: DimGray;">
-      <${input} placeholder="Find a repository..."/>
+      <${input} placeholder="Find a repository..." style="margin-right: 21px"/>
       ${showIfElse(() => !model.makingNew, h`
         <div style="display: flex; justify-content: flex-end;">
           <${button} onclick=${newStore} style="margin-right: 21px;">
