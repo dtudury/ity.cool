@@ -1,5 +1,5 @@
 import { render, h } from './horseless.js'
-import { dynamic } from './nodes.js'
+import dynamic from './components/dynamic.js'
 import { model } from './model.js'
 
 render(document.body, h`

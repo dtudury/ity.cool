@@ -13,7 +13,7 @@ const dbPromise = new Promise((resolve, reject) => {
   })
 })
 
-export async function readObject (key = 0) {
+export async function getObject (key = 0) {
   return dbPromise.then(db => new Promise((resolve, reject) => {
     Object.assign(db.transaction(['data']).objectStore('data').get(key), {
       onsuccess: event => {
