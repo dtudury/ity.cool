@@ -6,7 +6,7 @@ import input from './input.js'
 import button from './button.js'
 
 function saveModel ({ module, repos, created }, address) {
-  repos = JSON.parse(JSON.stringify(repos))
+  repos = repos.map(repo => ({ name: repo.name, address: repo.address }))
   const modified = Date.now()
   putObject({ module, repos, created, modified }, address)
 }
@@ -22,12 +22,12 @@ export default function ({ model, address }) {
       multibox.value = value
     }
   })
-  const saveRepo = el => async e => {
+  const createRepo = el => async e => {
     e.preventDefault()
     const name = model.input
     delete model.input
-    const repoAddress = await putObject({})
-    model.repos.unshift({ name, address: repoAddress, created: Date.now() })
+    const repoAddress = await putObject({ created: Date.now() })
+    model.repos.unshift({ name, address: repoAddress })
     saveModel(model, address)
   }
   const cancelInput = el => e => {
@@ -45,8 +45,11 @@ export default function ({ model, address }) {
     const toggleRepo = el => async e => {
       if (!repo.data) {
         repo.data = 'loading'
-        repo.data = getObject(repo.address)
+        repo.data = await getObject(repo.address)
       } else if (repo.data !== 'loading') delete repo.data
+    }
+    const saveRepo = el => async data => {
+      return putObject(data, repo.address)
     }
     return h`
       <div 
@@ -59,21 +62,19 @@ export default function ({ model, address }) {
         " 
         onclick=${toggleRepo}
       >
-        ${showIfElse(() => repo.data, octicons('chevron-down-16', { style: 'padding: 8px;' }), octicons('chevron-right-16', { style: 'padding: 8px;' }))}
-        ${octicons('repo-16', { style: 'padding: 8px;' })} 
+        ${showIfElse(() => repo.data, octicons('chevron-down-16', { style: 'padding-right: 4px;' }), octicons('chevron-right-16', { style: 'padding-right: 4px;' }))}
+        ${octicons('repo-16', { style: 'padding-right: 4px;' })} 
         <span style="flex-grow: 1">
           ${() => repo.name}
-        </span>
-        <span style="color: Gray; padding-right: 6px;">
-          ${() => new Date(repo.created).toLocaleString()}
         </span>
       </div>
       ${() => {
         if (repo.data) {
           return h`
             <${dynamic} 
-              module="${() => repo.module || './encryptedFolder.js'}" 
-              model=${repo} 
+              module="${() => repo.data.module || './encryptedRepo.js'}" 
+              model=${repo.data} 
+              saveRepo=${saveRepo}
             />
           `
         }
@@ -88,7 +89,7 @@ export default function ({ model, address }) {
           <${input} id="multibox" oninput=${handleInput} placeholder="Filter/Create a Repository..." style="flex-grow: 1;"/>
         </label>
         ${showIfElse(() => model.input, h`
-          <${button} onclick=${saveRepo}>
+          <${button} onclick=${createRepo}>
             ${octicons('north-star-16', { style: 'padding-right: 4px;' })} 
             Create
           </${button}>
