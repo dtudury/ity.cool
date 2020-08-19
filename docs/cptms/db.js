@@ -13,24 +13,57 @@ const dbPromise = new Promise((resolve, reject) => {
   })
 })
 
-export async function getObject (key = 0) {
-  return dbPromise.then(db => new Promise((resolve, reject) => {
-    Object.assign(db.transaction(['data']).objectStore('data').get(key), {
-      onsuccess: event => {
-        resolve(event.target.result)
-      },
-      onerror: reject
-    })
-  }))
-}
+export class ObjectStoreWrapper {
+  constructor (defaultKey = 0, encryptionFunction, decryptionFunction) {
+    this.defaultKey = defaultKey
+    this.encryptionFunction = encryptionFunction
+    this.decryptionFunction = decryptionFunction
+  }
 
-export async function putObject (object, key) {
-  return dbPromise.then(db => new Promise((resolve, reject) => {
-    Object.assign(db.transaction(['data'], 'readwrite').objectStore('data').put(object, key), {
-      onsuccess: event => {
-        resolve(event.target.result)
-      },
-      onerror: reject
-    })
-  }))
+  clone (newDefaultKey, encryptionFunction = this.encryptionFunction, decryptionFunction = this.decryptionFunction) {
+    return new ObjectStoreWrapper(newDefaultKey, encryptionFunction, decryptionFunction)
+  }
+
+  async getObject (key = this.defaultKey) {
+    return dbPromise.then(db => new Promise((resolve, reject) => {
+      Object.assign(db.transaction(['data']).objectStore('data').get(key), {
+        onsuccess: event => {
+          let object = event.target.result
+          if (this.decryptionFunction) {
+            object = this.decryptionFunction(object)
+          }
+          resolve(object)
+        },
+        onerror: reject
+      })
+    }))
+  }
+
+  async putObject (object, key = this.defaultKey) {
+    if (this.encryptionFunction) {
+      object = this.encryptionFunction(object)
+    }
+    return dbPromise.then(db => new Promise((resolve, reject) => {
+      Object.assign(db.transaction(['data'], 'readwrite').objectStore('data').put(object, key), {
+        onsuccess: event => {
+          resolve(event.target.result)
+        },
+        onerror: reject
+      })
+    }))
+  }
+
+  async addObject (object, key) {
+    if (this.encryptionFunction) {
+      object = this.encryptionFunction(object)
+    }
+    return dbPromise.then(db => new Promise((resolve, reject) => {
+      Object.assign(db.transaction(['data'], 'readwrite').objectStore('data').add(object, key), {
+        onsuccess: event => {
+          resolve(event.target.result)
+        },
+        onerror: reject
+      })
+    }))
+  }
 }

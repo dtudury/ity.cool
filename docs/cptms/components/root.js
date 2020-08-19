@@ -1,17 +1,10 @@
 import { h, showIfElse, watchFunction, mapEntries } from '../horseless.js'
-import { putObject, getObject } from '../db.js'
 import dynamic from './dynamic.js'
 import octicons from '../octicons.js'
 import input from './input.js'
 import button from './button.js'
 
-function saveModel ({ module, repos, created }, address) {
-  repos = repos.map(repo => ({ name: repo.name, address: repo.address }))
-  const modified = Date.now()
-  putObject({ module, repos, created, modified }, address)
-}
-
-export default function ({ model, address }) {
+export default function ({ model, address, objectStoreWrapper }) {
   model.module = model.module || './root.js'
   model.repos = model.repos || []
   model.created = model.created || Date.now()
@@ -23,10 +16,15 @@ export default function ({ model, address }) {
     }
   })
   const createRepo = el => async e => {
+    function saveModel ({ module, repos, created }) {
+      repos = repos.map(repo => ({ name: repo.name, address: repo.address }))
+      const modified = Date.now()
+      objectStoreWrapper.putObject({ module, repos, created, modified })
+    }
     e.preventDefault()
     const name = model.input
     delete model.input
-    const repoAddress = await putObject({ created: Date.now() })
+    const repoAddress = await objectStoreWrapper.addObject({ created: Date.now() })
     model.repos.unshift({ name, address: repoAddress })
     saveModel(model, address)
   }
@@ -45,11 +43,8 @@ export default function ({ model, address }) {
     const toggleRepo = el => async e => {
       if (!repo.data) {
         repo.data = 'loading'
-        repo.data = await getObject(repo.address)
+        repo.data = await objectStoreWrapper.getObject(repo.address)
       } else if (repo.data !== 'loading') delete repo.data
-    }
-    const saveRepo = el => async data => {
-      return putObject(data, repo.address)
     }
     return h`
       <div 
@@ -74,7 +69,7 @@ export default function ({ model, address }) {
             <${dynamic} 
               module="${() => repo.data.module || './encryptedRepo.js'}" 
               model=${repo.data} 
-              saveRepo=${saveRepo}
+              objectStoreWrapper=${objectStoreWrapper.clone(repo.address)}
             />
           `
         }

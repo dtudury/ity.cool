@@ -1,5 +1,5 @@
 import { proxy } from './horseless.js'
-import { getObject } from './db.js'
+import { ObjectStoreWrapper } from './db.js'
 
 export const model = window.model = proxy({
   position: {
@@ -16,6 +16,7 @@ const handleResize = e => {
 window.addEventListener('resize', handleResize)
 handleResize()
 
-getObject().then(result => {
+const objectStoreWrapper = new ObjectStoreWrapper()
+objectStoreWrapper.getObject().then(result => {
   Object.assign(model.root, result)
 })

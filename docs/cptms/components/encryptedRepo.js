@@ -4,7 +4,7 @@ import button from './button.js'
 import octicons from '../octicons.js'
 import fileDirectory from './fileDirectory.js'
 
-export default function ({ model, saveRepo }) {
+export default function ({ model, objectStoreWrapper }) {
   const initialize = el => async e => {
     e.preventDefault()
     const formData = new window.FormData(el)
@@ -14,7 +14,7 @@ export default function ({ model, saveRepo }) {
     if (!iterations || !salt) {
       iterations = Number(formData.get('iterations'))
       salt = window.crypto.getRandomValues(new Uint8Array(32))
-      await saveRepo({ iterations, salt, module: './encryptedRepo.js', created: model.created })
+      await objectStoreWrapper.putObject({ iterations, salt, module: './encryptedRepo.js', created: model.created })
     }
     const keyMaterial = await window.crypto.subtle.importKey('raw', passphrase, { name: 'PBKDF2' }, false, ['deriveKey'])
     model.key = await window.crypto.subtle.deriveKey(
