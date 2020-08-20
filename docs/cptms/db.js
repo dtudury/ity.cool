@@ -14,17 +14,17 @@ const dbPromise = new Promise((resolve, reject) => {
 })
 
 export class ObjectStoreWrapper {
-  constructor (defaultKey = 0, encryptionFunction, decryptionFunction) {
-    this.defaultKey = defaultKey
+  constructor (key, encryptionFunction, decryptionFunction) {
+    this.key = key
     this.encryptionFunction = encryptionFunction
     this.decryptionFunction = decryptionFunction
   }
 
-  clone (newDefaultKey, encryptionFunction = this.encryptionFunction, decryptionFunction = this.decryptionFunction) {
-    return new ObjectStoreWrapper(newDefaultKey, encryptionFunction, decryptionFunction)
+  clone (key, encryptionFunction = this.encryptionFunction, decryptionFunction = this.decryptionFunction) {
+    return new ObjectStoreWrapper(key, encryptionFunction, decryptionFunction)
   }
 
-  async getObject (key = this.defaultKey) {
+  async getObject (key = this.key) {
     return dbPromise.then(db => new Promise((resolve, reject) => {
       Object.assign(db.transaction(['data']).objectStore('data').get(key), {
         onsuccess: event => {
@@ -39,7 +39,7 @@ export class ObjectStoreWrapper {
     }))
   }
 
-  async putObject (object, key = this.defaultKey) {
+  async putObject (object, key = this.key) {
     if (this.encryptionFunction) {
       object = this.encryptionFunction(object)
     }

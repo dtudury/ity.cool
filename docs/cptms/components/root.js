@@ -4,10 +4,18 @@ import octicons from '../octicons.js'
 import input from './input.js'
 import button from './button.js'
 
-export default function ({ model, address, objectStoreWrapper }) {
-  model.module = model.module || './root.js'
-  model.repos = model.repos || []
-  model.created = model.created || Date.now()
+export default function ({ model, objectStoreWrapper }) {
+  function saveSelf ({ repos, nextChild, created }) {
+    repos = repos.map(repo => ({ name: repo.name, address: repo.address }))
+    const modified = Date.now()
+    objectStoreWrapper.putObject({ repos, nextChild, created, modified })
+  }
+  model.repos = []
+  model.created = Date.now()
+  model.nextChild = 0
+  objectStoreWrapper.getObject().then(result => {
+    Object.assign(model, result)
+  })
   watchFunction(() => {
     const value = model.input || ''
     const multibox = document.querySelector('#multibox')
@@ -16,17 +24,14 @@ export default function ({ model, address, objectStoreWrapper }) {
     }
   })
   const createRepo = el => async e => {
-    function saveModel ({ module, repos, created }) {
-      repos = repos.map(repo => ({ name: repo.name, address: repo.address }))
-      const modified = Date.now()
-      objectStoreWrapper.putObject({ module, repos, created, modified })
-    }
     e.preventDefault()
     const name = model.input
     delete model.input
-    const repoAddress = await objectStoreWrapper.addObject({ created: Date.now() })
+    const repoAddress = objectStoreWrapper.key + '.' + model.nextChild
+    ++model.nextChild
+    // await objectStoreWrapper.addObject({ created: Date.now() }, repoAddress)
     model.repos.unshift({ name, address: repoAddress })
-    saveModel(model, address)
+    saveSelf(model)
   }
   const cancelInput = el => e => {
     delete model.input
