@@ -26,7 +26,7 @@ export default function (attributes, children, description) {
     descriptionMap.set(description, h`
       <input 
         oninput=${handleInput} 
-        value="${() => model.input || ''}"
+        value=${() => model.input || ''}
         placeholder="Filter/Create" 
         style="
           width: 100%;
