@@ -1,4 +1,4 @@
-import { h, showIfElse, watchFunction, mapEntries } from '../horseless.js'
+import { h, showIfElse, mapEntries } from '../horseless.js'
 import dynamic from './dynamic.js'
 import octicons from '../octicons.js'
 import input from './input.js'
@@ -16,13 +16,6 @@ export default function ({ model, objectStoreWrapper }) {
   objectStoreWrapper.getObject().then(result => {
     Object.assign(model, result)
   })
-  watchFunction(() => {
-    const value = model.input || ''
-    const multibox = document.querySelector('#multibox')
-    if (multibox) {
-      multibox.value = value
-    }
-  })
   const createRepo = el => async e => {
     e.preventDefault()
     const name = model.input
@@ -37,6 +30,7 @@ export default function ({ model, objectStoreWrapper }) {
     delete model.input
   }
   const handleInput = el => e => {
+    console.log('input!')
     if (e.target.value) model.input = e.target.value
     else delete model.input
   }
@@ -86,7 +80,7 @@ export default function ({ model, objectStoreWrapper }) {
       <div style="display: flex; align-items: center; margin-right: 21px;">
         <label style="display: flex; flex-grow: 1; align-items: center;">
           ${octicons('repo-16', { style: 'padding: 8px;' })} 
-          <${input} id="multibox" oninput=${handleInput} placeholder="Filter/Create a Repository..." style="flex-grow: 1;"/>
+          <${input} id="multibox" oninput=${handleInput} value=${() => model.input || ''} placeholder="Filter/Create a Repository..." style="flex-grow: 1;"/>
         </label>
         ${showIfElse(() => model.input, h`
           <${button} onclick=${createRepo}>

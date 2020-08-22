@@ -1,6 +1,6 @@
 import { proxy } from '../horseless.js'
 
-const descriptionMap = new Map()
+const descriptionMap = new WeakMap()
 const moduleMap = new Map()
 const moduleStates = proxy({})
 
