@@ -5,12 +5,13 @@ export default function ({ model, objectStoreWrapper, onselect, type }, children
   const onclick = el => e => {
     onselect(model)
   }
-  if (type === 'selected') {
-    return h`<${seeker} model=${model} objectStoreWrapper=${objectStoreWrapper}/>`
+  if (model.selected && type === 'selected') {
+    return h`<${seeker} model=${() => model.selected} objectStoreWrapper=${() => objectStoreWrapper.clone(model.selected.address)}/>`
+  } else if (type === 'selector') {
+    return h`
+      <div onclick=${onclick}>
+        ${() => model.name + ' ' + model.address}
+      </div>
+    `
   }
-  return h`
-    <div onclick=${onclick}>
-      ${() => JSON.stringify(model)}
-    </div>
-  `
 }

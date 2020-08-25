@@ -3,7 +3,7 @@ import octicons from '../octicons.js'
 
 const descriptionMap = new WeakMap()
 
-export default function ({ model }, children, description) {
+export default function ({ model, objectStoreWrapper }, children, description) {
   const handleInput = el => e => {
     if (e.target.value) model.input = e.target.value
     else delete model.input
@@ -20,7 +20,7 @@ export default function ({ model }, children, description) {
   }
   const save = el => e => {
     e.preventDefault()
-    model.objectStoreWrapper.putObject({
+    objectStoreWrapper.putObject({
       children: model.children.map(child => ({
         name: child.name,
         address: child.address
