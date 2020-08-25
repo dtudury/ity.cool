@@ -1,16 +1,12 @@
 import { h } from '../horseless.js'
+import dynamic from './dynamic.js'
 
-const descriptionMap = new WeakMap()
-
-export default function (attributes, children, description) {
-  if (!descriptionMap.has(description)) {
-    attributes.style = `
-    ` + (attributes.style || '')
-    descriptionMap.set(description, h`
-      <main ${attributes}>
-        ${children}
-      </main>
-    `)
-  }
-  return descriptionMap.get(description)
+export default function ({ model, objectStoreWrapper }, children, description) {
+  console.log(objectStoreWrapper, model.selected.address)
+  return h`<${dynamic} 
+    module="${model.selected.module || './moduleChooser.js'}" 
+    model=${model.selected} 
+    objectStoreWrapper=${objectStoreWrapper.clone(model.selected.address)}
+    type="selected"
+  />`
 }
