@@ -24,7 +24,7 @@ export class ObjectStoreWrapper {
     return new ObjectStoreWrapper(key, encryptionFunction, decryptionFunction)
   }
 
-  async getObject (key = this.key) {
+  getObject (key = this.key) {
     return dbPromise.then(db => new Promise((resolve, reject) => {
       Object.assign(db.transaction(['data']).objectStore('data').get(key), {
         onsuccess: event => {
@@ -39,7 +39,7 @@ export class ObjectStoreWrapper {
     }))
   }
 
-  async putObject (object, key = this.key) {
+  putObject (object, key = this.key) {
     if (this.encryptionFunction) {
       object = this.encryptionFunction(object)
     }
@@ -53,7 +53,7 @@ export class ObjectStoreWrapper {
     }))
   }
 
-  async addObject (object, key) {
+  addObject (object, key) {
     if (this.encryptionFunction) {
       object = this.encryptionFunction(object)
     }
