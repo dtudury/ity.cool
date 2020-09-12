@@ -1,14 +1,16 @@
 import { h, mapEntries } from '../horseless.js'
 
-export function jsonDump ({ obj }, children, description) {
+export default function dump (obj) {
   if (Array.isArray(obj)) {
     return h`[${mapEntries(() => obj, (value, name) => {
-      return h`<div style="margin-left: 5px;">${name}: ${jsonDump(value)}</div>`
+      return h`<div style="margin-left: 3em;">${name}: ${dump(value)}</div>`
     })}]`
   } else if (typeof obj === 'object') {
     return h`{${mapEntries(() => obj, (value, name) => {
-      return h`<div style="margin-left: 5px;">${name}: ${jsonDump(value)}</div>`
+      return h`<div style="margin-left: 3em;">${name}: ${dump(value)}</div>`
     })}}`
+  } else if (typeof obj === 'function') {
+    return '[function]'
   } else {
     return h`${() => obj}`
   }
