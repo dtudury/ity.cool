@@ -1,3 +1,4 @@
+import './codec.js'
 import { proxy, watchFunction } from './horseless.js'
 import { ObjectStoreWrapper } from './db.js'
 const objectStoreWrapper = new ObjectStoreWrapper()

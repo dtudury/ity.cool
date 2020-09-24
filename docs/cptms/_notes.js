@@ -1,4 +1,4 @@
-
+// ★
 export const serialize = [
   /* magic number? */
   /* same prefix as below */'unencrypted data: nonce, iteration count',
@@ -62,6 +62,7 @@ export const decoded = {
 /*
 encoded:
 0[1[0]2,3]2.3[]4[]
+0:[2[3:(4)]](1(0)2)
 */
 
 export const props = {
