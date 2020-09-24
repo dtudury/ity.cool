@@ -1,13 +1,15 @@
-import { render, h } from './horseless.js'
+import { render, h, mapEntries } from './horseless.js'
 import { model } from './model.js'
-import { ObjectStoreWrapper } from './db.js'
-import seeker from './components/seeker.js'
+import panel from './components/panel.js'
+import dump from './_debug/dump.js'
 
-const address = document.location.hash.substring(1).split('.')[0] || '0'
-const objectStoreWrapper = new ObjectStoreWrapper(address)
-model.address = address
 render(document.body, h`
   <main style="display: flex; height: 100%;">
-    <${seeker} model=${model} objectStoreWrapper=${objectStoreWrapper}/>
+    ${mapEntries(() => model.uiPanels, (_, index) => h`
+      <section style="flex: 1 0 20em; overflow-y: scroll;">
+        <${panel} panelIndex=${index} model=${model}/>
+      </section>
+    `)}
   </main>
+  ${dump(model)}
 `)
