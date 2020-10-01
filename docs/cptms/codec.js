@@ -1,16 +1,62 @@
 export function encode (o, prefix = '') {
-  function _deprefix (s) {
+  function _deprefix (s, prefix) {
     if (!s.startsWith(prefix)) {
       console.error('does not start with', s, prefix)
       throw new Error('does not start with')
     }
     return s.substr(prefix.length)
   }
-  function _encodeExpanded (expanded, prefix) {
-
+  function _desuffix (s, suffix) {
+    if (!s.endsWith(suffix)) {
+      console.error('does not end with', s, suffix)
+      throw new Error('does not end with')
+    }
+    return s.substr(0, s.length - suffix.length)
   }
-  let encoded = '#' + _deprefix(o.address)
-  encoded += _encodeExpanded(o.expanded, o.address + '.')
+  function _transformExpanded (expanded, prefix) {
+    const transformed = {}
+    for (const item of expanded) {
+      transformed[_deprefix(item.address, prefix)] = _transformExpanded(item.expanded, item.address + '.')
+    }
+    return transformed
+  }
+  function _encodeExpanded (expanded, selectedPath, selected) {
+    let str = ''
+    const firstSelected = selectedPath[0]
+    const keys = Object.keys(expanded).sort((a, b) => {
+      if (selectedPath.length > 1) {
+        if (a === firstSelected) return 1
+        if (b === firstSelected) return -1
+      }
+      return a - b
+    })
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i]
+      str += key
+      let inner
+      if (firstSelected === key) {
+        inner = _encodeExpanded(expanded[key], selectedPath.slice(1), selected)
+      } else {
+        inner = _encodeExpanded(expanded[key], [])
+      }
+      if (inner) {
+        str += `(${inner})`
+      } else if (i !== keys.length - 1) {
+        str += ','
+      }
+      if (selected && selectedPath.length === 1 && i === keys.length - 1) {
+        str += encode(selected, _desuffix(selected.address, selectedPath[0]))
+      }
+    }
+    return str
+  }
+  let encoded = '#'
+  const expanded = _transformExpanded([o], prefix)
+  let selected = []
+  if (o.selected) {
+    selected = _deprefix(o.selected.address, prefix).split('.')
+  }
+  encoded += _encodeExpanded(expanded, selected, o.selected)
   return encoded
 }
 
@@ -80,9 +126,11 @@ export function decode (s) {
   return panels[0]
 }
 
-const encoded1 = '#0(0,1(1,2(#1)))'
+const encoded1 = '#0(0,2,1(1,2(1#1(0,1(2)#0(1)))))'
 console.log(encoded1)
 const decoded1 = decode(encoded1)
 console.log(JSON.stringify(decoded1, null, '  '))
 const encoded2 = encode(decoded1)
+console.log(encoded1)
 console.log(encoded2)
+console.log(encoded1 === encoded2)
