@@ -16,7 +16,7 @@ export function encode (o, prefix = '') {
   function _transformExpanded (expanded, prefix) {
     const transformed = {}
     for (const item of expanded) {
-      transformed[_deprefix(item.address, prefix)] = _transformExpanded(item.expanded, item.address + '.')
+      transformed[_deprefix(item.address, prefix)] = _transformExpanded(item.expanded || [], item.address + '.')
     }
     return transformed
   }
@@ -44,9 +44,9 @@ export function encode (o, prefix = '') {
       } else if (i !== keys.length - 1) {
         str += ','
       }
-      if (selected && selectedPath.length === 1 && i === keys.length - 1) {
-        str += encode(selected, _desuffix(selected.address, selectedPath[0]))
-      }
+    }
+    if (selected && selectedPath.length === 1) {
+      str += encode(selected, _desuffix(selected.address, selectedPath[0]))
     }
     return str
   }
@@ -126,7 +126,9 @@ export function decode (s) {
   return panels[0]
 }
 
+/*
 const encoded1 = '#0(0,2,1(1,2(1#1(0,1(2)#0(1)))))'
+// const encoded1 = '#0(#1)'
 console.log(encoded1)
 const decoded1 = decode(encoded1)
 console.log(JSON.stringify(decoded1, null, '  '))
@@ -134,3 +136,4 @@ const encoded2 = encode(decoded1)
 console.log(encoded1)
 console.log(encoded2)
 console.log(encoded1 === encoded2)
+*/

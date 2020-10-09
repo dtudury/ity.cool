@@ -1,6 +1,6 @@
-import './codec.js'
 import { proxy, watchFunction } from './horseless.js'
 import { ObjectStoreWrapper } from './db.js'
+import { encode, decode } from './codec.js'
 const objectStoreWrapper = new ObjectStoreWrapper()
 export const model = window.model = proxy({ files: {} })
 
@@ -30,49 +30,20 @@ function deepSet (src, dest, key) {
   }
 }
 
-function removePrefix (prefix, str) {
-  if (str.startsWith(prefix)) {
-    return str.substr(prefix.length)
-  }
-  throw new Error(`string "${str}" doesn't start with prefix "${prefix}"`)
-}
-
 function hashToModel () {
-  const hash = window.location.hash.substr(1) || '0'
-  // console.log('starting with hash', window.location.hash)
-  let prefix = ''
-  const uiPanels = hash.split(':').map(substr => {
-    const [addressSuffix, expandedSuffixes] = substr.split(';')
-    const address = `${prefix}${addressSuffix}`
-    prefix = address
-    let expanded = []
-    if (expandedSuffixes) {
-      expanded = expandedSuffixes.split(',').map(v => `${prefix}${v}`)
-    }
-    return { address, expanded }
-  })
-  for (let i = 0; i < uiPanels.length - 1; i++) {
-    uiPanels[i].selected = uiPanels[i + 1].address
-  }
-  deepSet(uiPanels, model, 'uiPanels')
-  // console.log('ending with model', JSON.stringify(model, null, '  '))
+  const hash = window.location.hash || '#0'
+  deepSet(decode(hash), model, 'uiPanels')
 }
 
 function modelToHash () {
-  // console.log('starting with model', JSON.stringify(model, null, '  '))
-  let prefix = ''
-  const hash = `#${model.uiPanels.map(panel => {
-    let substr = removePrefix(prefix, panel.address)
-    prefix = panel.address
-    if (panel.expanded && panel.expanded.length) {
-      substr = `${substr};${panel.expanded.map(v => removePrefix(prefix, v)).join(',')}`
-    }
-    return substr
-  }).join(':')}`
+  const hash = encode(model.uiPanels)
   if (window.location.hash !== hash) {
-    window.history.pushState(null, null, hash)
+    if (window.location.hash) {
+      window.history.pushState(null, null, hash)
+    } else {
+      window.history.replaceState(null, null, hash)
+    }
   }
-  // console.log('ending with hash', hash)
 }
 
 window.onhashchange = hashToModel
