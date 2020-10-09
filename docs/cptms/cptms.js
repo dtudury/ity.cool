@@ -5,7 +5,7 @@ import dump from './_debug/dump.js'
 
 render(document.body, h`
   <main style="display: flex; height: 100%;">
-    <${panel} uiPanels=${model.uiPanels} model=${model}/>
+    <${panel} state=${model.state} model=${model}/>
   </main>
   ${dump(model)}
 `)

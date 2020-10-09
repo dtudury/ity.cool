@@ -4,6 +4,13 @@ import { encode, decode } from './codec.js'
 const objectStoreWrapper = new ObjectStoreWrapper()
 export const model = window.model = proxy({ files: {} })
 
+watchFunction(() => {
+  console.log(model.focus)
+  if (model.focus) {
+    document.getElementById(model.focus).scrollIntoView()
+  }
+})
+
 model.get = function (address, lazy = false) {
   if (!model.files[address] || !model.files[address].requested) {
     model.files[address] = model.files[address] || {}
@@ -32,11 +39,11 @@ function deepSet (src, dest, key) {
 
 function hashToModel () {
   const hash = window.location.hash || '#0'
-  deepSet(decode(hash), model, 'uiPanels')
+  deepSet(decode(hash), model, 'state')
 }
 
 function modelToHash () {
-  const hash = encode(model.uiPanels)
+  const hash = encode(model.state)
   if (window.location.hash !== hash) {
     if (window.location.hash) {
       window.history.pushState(null, null, hash)
