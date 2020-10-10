@@ -1,22 +1,10 @@
+import { deprefix, desuffix } from './address.js'
+
 export function encode (o, prefix = '') {
-  function _deprefix (s, prefix) {
-    if (!s.startsWith(prefix)) {
-      console.error('does not start with', s, prefix)
-      throw new Error('does not start with')
-    }
-    return s.substr(prefix.length)
-  }
-  function _desuffix (s, suffix) {
-    if (!s.endsWith(suffix)) {
-      console.error('does not end with', s, suffix)
-      throw new Error('does not end with')
-    }
-    return s.substr(0, s.length - suffix.length)
-  }
   function _transformExpanded (expanded, prefix) {
     const transformed = {}
     for (const item of expanded) {
-      transformed[_deprefix(item.address, prefix)] = _transformExpanded(item.expanded || [], item.address + '.')
+      transformed[deprefix(item.address, prefix)] = _transformExpanded(item.expanded || [], item.address + '.')
     }
     return transformed
   }
@@ -46,7 +34,7 @@ export function encode (o, prefix = '') {
       }
     }
     if (selected && selectedPath.length === 1) {
-      str += encode(selected, _desuffix(selected.address, selectedPath[0]))
+      str += encode(selected, desuffix(selected.address, selectedPath[0]))
     }
     return str
   }
@@ -54,7 +42,7 @@ export function encode (o, prefix = '') {
   const expanded = _transformExpanded([o], prefix)
   let selected = []
   if (o.selected) {
-    selected = _deprefix(o.selected.address, prefix).split('.')
+    selected = deprefix(o.selected.address, prefix).split('.')
   }
   encoded += _encodeExpanded(expanded, selected, o.selected)
   return encoded
@@ -126,7 +114,6 @@ export function decode (s) {
   return panels[0]
 }
 
-/*
 const encoded1 = '#0(0,2,1(1,2(1#1(0,1(2)#0(1)))))'
 // const encoded1 = '#0(#1)'
 console.log(encoded1)
@@ -136,4 +123,3 @@ const encoded2 = encode(decoded1)
 console.log(encoded1)
 console.log(encoded2)
 console.log(encoded1 === encoded2)
-*/

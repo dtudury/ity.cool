@@ -4,13 +4,6 @@ import { encode, decode } from './codec.js'
 const objectStoreWrapper = new ObjectStoreWrapper()
 export const model = window.model = proxy({ files: {} })
 
-watchFunction(() => {
-  console.log(model.focus)
-  if (model.focus) {
-    document.getElementById(model.focus).scrollIntoView()
-  }
-})
-
 model.get = function (address, lazy = false) {
   if (!model.files[address] || !model.files[address].requested) {
     model.files[address] = model.files[address] || {}
