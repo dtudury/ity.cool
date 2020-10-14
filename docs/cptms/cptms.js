@@ -6,7 +6,7 @@ import dump from './_debug/dump.js'
 watchFunction(() => {
   console.log(model.focus)
   if (model.focus) {
-    document.getElementById(model.focus).scrollIntoView({ behavior: 'smooth' })
+    // document.getElementById(model.focus).scrollIntoView({ behavior: 'smooth' })
   }
 })
 

@@ -1,15 +1,16 @@
 import { h, mapEntries, showIfElse } from '../horseless.js'
 import octicons from '../octicons.js'
 
-function fileListItemView ({ child, state, select, selected }, children, description) {
-  const isExpanded = () => state.expanded.some(({ address }) => address === child.address)
+const fileListItemViews = new Map()
+function fileListItemView ({ child, expandedState, selectedState, model, indent, select, selected }, children, description) {
+  const isExpanded = () => expandedState.expanded.find(({ address }) => address === child.address)
   const chevronDown = octicons('chevron-down-16', el => ({
     onclick: e => {
       e.stopPropagation()
       console.log('close')
-      for (let i = state.expanded.length - 1; i >= 0; i--) {
-        if (state.expanded[i].address === child.address) {
-          state.expanded.splice(i, 1)
+      for (let i = expandedState.expanded.length - 1; i >= 0; i--) {
+        if (expandedState.expanded[i].address === child.address) {
+          expandedState.expanded.splice(i, 1)
         }
       }
     }
@@ -18,44 +19,51 @@ function fileListItemView ({ child, state, select, selected }, children, descrip
     onclick: e => {
       e.stopPropagation()
       console.log('open')
-      state.expanded.push({
+      expandedState.expanded.push({
         address: child.address,
         expanded: []
       })
-      console.log(JSON.parse(JSON.stringify(state)))
+      console.log(JSON.parse(JSON.stringify(expandedState)))
     }
   }))
   return h`
-    <div onclick=${el => select} style="border: 1px solid red;">
+    <div onclick=${el => select} style="border: 1px solid red; padding-left: ${indent * 10}px">
       ${showIfElse(isExpanded, chevronDown, chevronRight)}
       ${() => JSON.stringify(child.name)}
-      ${showIfElse(() => state.selected && state.selected.address === child.address, octicons('north-star-16'))}
+      ${showIfElse(() => selectedState.selected && selectedState.selected.address === child.address, octicons('north-star-16'))}
     </div>
     ${showIfElse(isExpanded, h`
-      open
+      <${fileListView}
+        expandedState=${isExpanded}
+        selectedState=${selectedState}
+        model=${model}
+        indent=${indent + 1}
+      />
     `)}
   `
 }
 
 const fileListViews = new Map()
-function fileListView ({ state, model, indent }, children, description) {
-  const file = model.get(state.address)
+function fileListView ({ expandedState, selectedState, model, indent }, children, description) {
+  const file = model.get(expandedState.address)
   const data = file.data
   if (data) {
-    model.focus = state.address
+    model.focus = expandedState.address
   }
   const select = child => el => e => {
-    state.selected = state.selected || {}
-    state.selected.address = child.address
-    state.selected.expanded = []
+    selectedState.selected = selectedState.selected || {}
+    selectedState.selected.address = child.address
+    selectedState.selected.expanded = []
   }
   if (!fileListViews.has(description)) {
-    fileListViews.set(description, showIfElse(() => model.get(state.address).data, h`
-      ${mapEntries(() => model.get(state.address).data.children, child => h`
+    fileListViews.set(description, showIfElse(() => model.get(expandedState.address).data, h`
+      ${mapEntries(() => model.get(expandedState.address).data.children, child => h`
         <${fileListItemView}
           select=${select(child)}
           child=${child}
-          state=${state}
+          expandedState=${expandedState}
+          selectedState=${selectedState}
+          model=${model}
           indent=${indent}
         />
       `)}
@@ -71,7 +79,8 @@ export default function panel ({ state, model }, children, description) {
       panels.set(description, h`
         <section id=${() => state.address} style="flex: 1 0 20em; overflow-y: scroll;">
           <${fileListView}
-            state=${() => state}
+            expandedState=${state}
+            selectedState=${state}
             model=${model}
             indent=${0}
           />
