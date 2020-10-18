@@ -3,7 +3,7 @@ import octicons from '../octicons.js'
 
 const fileListItemViews = new Map()
 function fileListItemView ({ child, expandedState, selectedState, model, indent, select, selected }, children, description) {
-  const isExpanded = () => expandedState.expanded.find(({ address }) => address === child.address)
+  const getExpanded = () => expandedState.expanded.find(({ address }) => address === child.address)
   const chevronDown = octicons('chevron-down-16', el => ({
     onclick: e => {
       e.stopPropagation()
@@ -21,20 +21,22 @@ function fileListItemView ({ child, expandedState, selectedState, model, indent,
       console.log('open')
       expandedState.expanded.push({
         address: child.address,
-        expanded: []
+        expanded: [],
+        selected: {}
       })
       console.log(JSON.parse(JSON.stringify(expandedState)))
     }
   }))
   return h`
     <div onclick=${el => select} style="border: 1px solid red; padding-left: ${indent * 10}px">
-      ${showIfElse(isExpanded, chevronDown, chevronRight)}
+      ${showIfElse(getExpanded, chevronDown, chevronRight)}
       ${() => JSON.stringify(child.name)}
+      ${() => JSON.stringify(child.address)}
       ${showIfElse(() => selectedState.selected && selectedState.selected.address === child.address, octicons('north-star-16'))}
     </div>
-    ${showIfElse(isExpanded, h`
+    ${showIfElse(getExpanded, h`
       <${fileListView}
-        expandedState=${isExpanded}
+        expandedState=${getExpanded}
         selectedState=${selectedState}
         model=${model}
         indent=${indent + 1}
@@ -45,6 +47,7 @@ function fileListItemView ({ child, expandedState, selectedState, model, indent,
 
 const fileListViews = new Map()
 function fileListView ({ expandedState, selectedState, model, indent }, children, description) {
+  if (!expandedState.address) return
   const file = model.get(expandedState.address)
   const data = file.data
   if (data) {
@@ -52,8 +55,15 @@ function fileListView ({ expandedState, selectedState, model, indent }, children
   }
   const select = child => el => e => {
     selectedState.selected = selectedState.selected || {}
-    selectedState.selected.address = child.address
-    selectedState.selected.expanded = []
+    if (selectedState.selected.address !== child.address) {
+      selectedState.selected.address = child.address
+      selectedState.selected.expanded = []
+      selectedState.selected.selected = selectedState.selected.selected || {}
+      delete selectedState.selected.selected.address
+      selectedState.selected.selected.expanded = []
+      delete selectedState.selected.selected.selected
+      // delete selectedState.selected.selected
+    }
   }
   if (!fileListViews.has(description)) {
     fileListViews.set(description, showIfElse(() => model.get(expandedState.address).data, h`
@@ -74,10 +84,11 @@ function fileListView ({ expandedState, selectedState, model, indent }, children
 
 const panels = new Map()
 export default function panel ({ state, model }, children, description) {
-  if (state && state.address) {
+  if (state && state.address && state.selected) {
     if (!panels.has(description)) {
       panels.set(description, h`
         <section id=${() => state.address} style="flex: 1 0 20em; overflow-y: scroll;">
+          ${() => state.address}
           <${fileListView}
             expandedState=${state}
             selectedState=${state}
@@ -85,7 +96,7 @@ export default function panel ({ state, model }, children, description) {
             indent=${0}
           />
         </section>
-        <${panel} state=${() => state.selected} model=${model}/>
+        <${panel} state=${state.selected} model=${model}/>
       `)
     }
     return panels.get(description)

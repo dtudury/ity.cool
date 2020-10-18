@@ -41,7 +41,7 @@ export function encode (o, prefix = '') {
   let encoded = '#'
   const expanded = _transformExpanded([o], prefix)
   let selected = []
-  if (o.selected) {
+  if (o.selected && o.selected.address) {
     selected = deprefix(o.selected.address, prefix).split('.')
   }
   encoded += _encodeExpanded(expanded, selected, o.selected)

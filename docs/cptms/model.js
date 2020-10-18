@@ -18,7 +18,7 @@ model.get = function (address, lazy = false) {
 }
 
 function deepSet (src, dest, key) {
-  if (dest[key] && typeof src === typeof dest[key] && typeof src === 'object') {
+  if (dest[key] && typeof src === 'object' && typeof dest[key] === 'object') {
     Object.getOwnPropertyNames(dest[key]).forEach(name => {
       if (!Object.prototype.hasOwnProperty.call(src, name)) {
         delete dest[key][name]
