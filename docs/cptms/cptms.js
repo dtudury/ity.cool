@@ -6,13 +6,18 @@ import dump from './_debug/dump.js'
 watchFunction(() => {
   console.log(model.focus)
   if (model.focus) {
-    // document.getElementById(model.focus).scrollIntoView({ behavior: 'smooth' })
+    try {
+      document.getElementById(model.focus).scrollIntoView({ behavior: 'smooth' })
+    } catch (e) {
+      console.log(model.focus)
+      console.error(e)
+    }
   }
 })
 
 render(document.body, h`
   <main style="display: flex; height: 100%;">
-    <${panel} state=${model.state} model=${model}/>
+    <${panel} state=${model.state}/>
   </main>
   ${dump(model)}
 `)

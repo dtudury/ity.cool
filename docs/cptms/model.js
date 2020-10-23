@@ -4,7 +4,7 @@ import { encode, decode } from './codec.js'
 const objectStoreWrapper = new ObjectStoreWrapper()
 export const model = window.model = proxy({ files: {} })
 
-model.get = function (address, lazy = false) {
+export function getFile (address, lazy = false) {
   if (!model.files[address] || !model.files[address].requested) {
     model.files[address] = model.files[address] || {}
     if (!lazy) {
@@ -32,7 +32,8 @@ function deepSet (src, dest, key) {
 
 function hashToModel () {
   const hash = window.location.hash || '#0'
-  deepSet(decode(hash), model, 'state')
+  const decodedState = decode(hash)
+  deepSet(decodedState, model, 'state')
 }
 
 function modelToHash () {

@@ -1,15 +1,14 @@
 import { h, mapEntries, showIfElse } from '../horseless.js'
+import { model, getFile } from '../model.js'
 import octicons from '../octicons.js'
 
 const panelStateRecycler = new Map()
 
-const fileListItemViews = new Map()
-function fileListItemView ({ child, expandedState, panelState, model, indent, select, selected }, children, description) {
+function fileListItemView ({ child, expandedState, panelState, indent, select, selected }, children, description) {
   const getExpanded = () => expandedState.expanded.find(({ address }) => address === child.address)
   const chevronDown = octicons('chevron-down-16', el => ({
     onclick: e => {
       e.stopPropagation()
-      console.log('close')
       for (let i = expandedState.expanded.length - 1; i >= 0; i--) {
         if (expandedState.expanded[i].address === child.address) {
           expandedState.expanded.splice(i, 1)
@@ -19,17 +18,12 @@ function fileListItemView ({ child, expandedState, panelState, model, indent, se
   }))
   const chevronRight = octicons('chevron-right-16', el => ({
     onclick: e => {
-      if (!panelStateRecycler.has(panelState)) {
-        panelStateRecycler.set(panelState, {})
-      }
       e.stopPropagation()
-      console.log('open')
       expandedState.expanded.push({
         address: child.address,
         expanded: [],
-        selected: panelStateRecycler.get(panelState) || {}
+        selected: {}
       })
-      console.log(JSON.parse(JSON.stringify(expandedState)))
     }
   }))
   return h`
@@ -43,19 +37,17 @@ function fileListItemView ({ child, expandedState, panelState, model, indent, se
       <${fileListView}
         expandedState=${getExpanded}
         panelState=${panelState}
-        model=${model}
         indent=${indent + 1}
       />
     `)}
   `
 }
 
-const fileListViews = new Map()
-function fileListView ({ expandedState, panelState, model, indent }, children, description) {
+function fileListView ({ expandedState, panelState, indent }, children, description) {
   if (!expandedState.address) {
     return
   }
-  const file = model.get(expandedState.address)
+  const file = getFile(expandedState.address)
   const data = file.data
   if (data) {
     model.focus = expandedState.address
@@ -66,49 +58,43 @@ function fileListView ({ expandedState, panelState, model, indent }, children, d
     }
     panelState.selected = panelStateRecycler.get(panelState)
     if (panelState.selected.address !== child.address) {
-      panelState.selected.address = child.address
-      panelState.selected.expanded = []
-      if (panelState.selected.selected) {
-        delete panelState.selected.selected.address
-        delete panelState.selected.selected
+      panelState.selected = {
+        address: child.address,
+        expanded: []
       }
     }
   }
-  if (!fileListViews.has(description)) {
-    fileListViews.set(description, showIfElse(() => model.get(expandedState.address).data, h`
-      ${mapEntries(() => model.get(expandedState.address).data.children, child => h`
-        <${fileListItemView}
-          select=${select(child)}
-          child=${child}
-          expandedState=${expandedState}
-          panelState=${panelState}
-          model=${model}
-          indent=${indent}
-        />
-      `)}
-    `, 'loading...'))
-  }
-  return fileListViews.get(description)
+  return showIfElse(() => getFile(expandedState.address).data, h`
+    ${mapEntries(() => getFile(expandedState.address).data.children, child => h`
+      <${fileListItemView}
+        select=${select(child)}
+        child=${() => child}
+        expandedState=${() => expandedState}
+        panelState=${() => panelState}
+        indent=${indent}
+      />
+    `)}
+  `, 'loading...')
 }
 
-const panels = new Map()
-export default function panel ({ state, model }, children, description) {
+const panels = new WeakMap()
+export default function panel ({ state }, children, description) {
   if (state && state.address) {
-    console.log(state.address)
-    if (!panels.has(description)) {
-      panels.set(description, h`
+    if (!panels.has(state)) {
+      panels.set(state, h`
         <section id=${() => state.address} style="flex: 1 0 20em; overflow-y: scroll;">
           ${() => state.address}
           <${fileListView}
             expandedState=${state}
             panelState=${state}
-            model=${model}
             indent=${0}
           />
         </section>
-        <${panel} state=${() => state.selected} model=${model}/>
       `)
     }
-    return panels.get(description)
+    return h`
+      ${panels.get(state)}
+      <${panel} state=${state.selected}/>
+    `
   }
 }
