@@ -2,7 +2,6 @@ import { h, mapEntries, showIfElse } from '../horseless.js'
 import { model, getFile } from '../model.js'
 import octicons from '../octicons.js'
 
-const panelStateRecycler = new Map()
 
 function fileListItemView ({ child, expandedState, panelState, indent, select, selected }, children, description) {
   const getExpanded = () => expandedState.expanded.find(({ address }) => address === child.address)
@@ -43,15 +42,13 @@ function fileListItemView ({ child, expandedState, panelState, indent, select, s
   `
 }
 
+const panelStateRecycler = new Map()
 function fileListView ({ expandedState, panelState, indent }, children, description) {
   if (!expandedState.address) {
     return
   }
   const file = getFile(expandedState.address)
   const data = file.data
-  if (data) {
-    model.focus = expandedState.address
-  }
   const select = child => el => e => {
     if (!panelStateRecycler.has(panelState)) {
       panelStateRecycler.set(panelState, panelState.selected || {})
@@ -69,8 +66,8 @@ function fileListView ({ expandedState, panelState, indent }, children, descript
       <${fileListItemView}
         select=${select(child)}
         child=${() => child}
-        expandedState=${() => expandedState}
-        panelState=${() => panelState}
+        expandedState=${expandedState}
+        panelState=${panelState}
         indent=${indent}
       />
     `)}
@@ -80,8 +77,10 @@ function fileListView ({ expandedState, panelState, indent }, children, descript
 const panels = new WeakMap()
 export default function panel ({ state }, children, description) {
   if (state && state.address) {
-    if (!panels.has(state)) {
-      panels.set(state, h`
+    if (!panels.has(description)) {
+      console.log('***', state.address)
+      model.focus = state.address
+      panels.set(description, h`
         <section id=${() => state.address} style="flex: 1 0 20em; overflow-y: scroll;">
           ${() => state.address}
           <${fileListView}
@@ -93,7 +92,7 @@ export default function panel ({ state }, children, description) {
       `)
     }
     return h`
-      ${panels.get(state)}
+      ${panels.get(description)}
       <${panel} state=${state.selected}/>
     `
   }
