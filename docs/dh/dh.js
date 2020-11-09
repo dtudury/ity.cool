@@ -18,7 +18,7 @@ handleResize()
 
 function stepToCommand (prefix, step) {
   const steps = model.modulus
-  const angle = 2 * Math.PI * (step / steps - 0.25) // put top between 1 and -1 (there is no zero (or really -1 but I know what I mean))
+  const angle = 2 * Math.PI * (step - 0.5) / (steps - 1) - Math.PI / 2 // put top between 1 and -1 (there is no zero (or really -1 but I know what I mean))
   return `${prefix}${0.5 * model.min * Math.cos(angle) + 0.5 * model.width} ${0.5 * model.min * Math.sin(angle) + 0.5 * model.height}`
 }
 
