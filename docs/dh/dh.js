@@ -1,4 +1,5 @@
-import { h, render, proxy, watchFunction } from './horseless.0.5.1.min.esm.js' // '/unpkg/horseless/horseless.js'
+import { h, render, proxy } from './horseless.0.5.1.min.esm.js' // '/unpkg/horseless/horseless.js'
+import { getPathData } from './dhmath.js'
 
 const model = window.model = proxy({
   scale: 100,
@@ -15,35 +16,6 @@ function handleResize () {
 }
 window.addEventListener('resize', handleResize)
 handleResize()
-
-function stepToCommand (prefix, step) {
-  const steps = model.modulus
-  const angle = 2 * Math.PI * (step - 0.5) / (steps - 1) - Math.PI / 2 // put top between 1 and -1 (there is no zero (or really -1 but I know what I mean))
-  return `${prefix}${0.5 * model.min * Math.cos(angle) + 0.5 * model.width} ${0.5 * model.min * Math.sin(angle) + 0.5 * model.height}`
-}
-
-watchFunction(() => {
-  const modulus = model.modulus
-  const base = model.base % modulus
-  const commands = []
-  let prefix = 'M'
-  let step = base
-  let count = 0
-  do {
-    commands.push(stepToCommand(prefix, step))
-    step = step * base % modulus
-    prefix = 'L'
-    count++
-  } while (step !== base && count < modulus)
-  console.log(count)
-  if (count === modulus - 1 && step === base) {
-    console.log('is generator')
-    model.generator = true
-  } else {
-    model.generator = false
-  }
-  model.pathData = commands.join('') + 'Z'
-})
 
 const scaleChange = el => e => {
   model.scale = Number(el.value)
@@ -102,6 +74,6 @@ render(document.body, h`
   </details>
   <svg width="${() => model.width}px" height="${() => model.height}px" viewBox="0 0 ${() => model.width} ${() => model.height}" xmlns="http://www.w3.org/2000/svg">
     <circle cx="${() => 0.5 * model.width}" cy="${() => 0.5 * model.height}" r="${() => 0.5 * model.min}"/>
-    <path d="${() => model.pathData}"/>
+    <path d="${() => getPathData(model)}"/>
   </svg>
 `)
