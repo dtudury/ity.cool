@@ -1,5 +1,5 @@
 import { h, render, proxy } from './horseless.0.5.1.min.esm.js' // '/unpkg/horseless/horseless.js'
-import { getPathData } from './dhmath.js'
+import { getIsGenerator, getPathData } from './dhmath.js'
 
 const model = window.model = proxy({
   scale: 100,
@@ -69,7 +69,7 @@ render(document.body, h`
     <input type="number" onchange=${baseChange} name="base" value="${() => model.base}" min="2" max="${() => model.modulus}">
     <br>
     <p>
-      ${() => model.base} is${() => model.generator ? ' ' : ' NOT '}a <a href="https://en.wikipedia.org/wiki/Primitive_root_modulo_n">primitive root</a> modulo ${() => model.modulus}
+      ${() => model.base} is${() => getIsGenerator(model) ? ' ' : ' NOT '}a <a href="https://en.wikipedia.org/wiki/Primitive_root_modulo_n">primitive root</a> modulo ${() => model.modulus}
     </p>
   </details>
   <svg width="${() => model.width}px" height="${() => model.height}px" viewBox="0 0 ${() => model.width} ${() => model.height}" xmlns="http://www.w3.org/2000/svg">
