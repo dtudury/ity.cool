@@ -1,22 +1,25 @@
 /* eslint-env browser */
 import { render, h, proxy, showIfElse, watchFunction } from './horseless.0.5.1.min.esm.js'
 const model = window.model = proxy(localStorage.getItem('model') ? JSON.parse(localStorage.getItem('model')) : {
-  a: { x: 100, y: 100 },
-  b: { x: 200, y: 100 },
-  c: { x: 200, y: 200 },
-  d: { x: 100, y: 200 },
-  v: { x: 150, y: 150 },
+  a: { x: 699, y: 321 },
+  b: { x: 491, y: 535 },
+  c: { x: 270, y: 243 },
+  d: { x: 291, y: 519 },
+  v: { x: 381, y: 263 },
   showingSpine: true,
   showingStringArt: false,
-  steps: 32
+  steps: 20
 })
 watchFunction(() => { localStorage.setItem('model', JSON.stringify(model)) })
 
 const circle = (p, attributes, ongrab) => h`<circle cx="${() => p.x}" cy="${() => p.y}" onmousedown=${ongrab} ${attributes}/>`
 const draggableCircle = (p, attributes = { r: 5 }) => {
+  attributes.cursor = 'crosshair'
   const ongrab = el => e => {
     const ondrag = e => Object.assign(p, { x: e.x, y: e.y })
-    const onrelease = e => Object.entries(handlers).forEach(([name, handler]) => document.body.removeEventListener(name, handler))
+    const onrelease = e => {
+      Object.entries(handlers).forEach(([name, handler]) => document.body.removeEventListener(name, handler))
+    }
     const handlers = { mousemove: ondrag, mouseup: onrelease, mouseleave: onrelease }
     Object.entries(handlers).forEach(([name, handler]) => document.body.addEventListener(name, handler))
   }
@@ -36,6 +39,7 @@ const distance = (a, b) => Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y
 const add = (a, b) => ({ x: a.x + b.x, y: a.y + b.y })
 const sub = (a, b) => add(a, { x: -b.x, y: -b.y })
 const scale = (a, v) => ({ x: a.x * v, y: a.y * v })
+const unit = angle => ({ x: Math.cos(angle), y: Math.sin(angle) })
 const dot = (a, b) => a.x * b.x + a.y * b.y
 const rot = (a, angle) => {
   const s = Math.sin(angle)
@@ -50,7 +54,7 @@ const p2xy = p => `${p.x} ${p.y}`
 const toSteps = (steps, f) => steps > 1 ? Array(steps).fill().map((_, i) => f(i / (steps - 1))) : null
 const line = (a, b, attributes) => h`<path d="M${() => p2xy(a)}L${() => p2xy(b)}" ${attributes}/>`
 const curve = (a, b, c, d, attributes) => h`<path d="M${() => p2xy(a)}C${() => p2xy(b)} ${() => p2xy(c)} ${() => p2xy(d)}" ${attributes}/>`
-const stretchedCurve = (a, b, c, d, v, attributes) => el => {
+const stretchedCurve = (a, b, c, d, v) => el => {
   const av = Math.pow(distance(a, v), Math.SQRT2)
   const dv = Math.pow(distance(d, v), Math.SQRT2)
   const t = av / (av + dv)
@@ -60,18 +64,28 @@ const stretchedCurve = (a, b, c, d, v, attributes) => el => {
   const abbc = bezierP([ab, bc], t)
   const bccd = bezierP([bc, cd], t)
   const abbcbccd = bezierP([abbc, bccd], t)
-  let dspin = atan(sub(v, d)) - atan(sub(abbcbccd, d))
-  let aspin = atan(sub(v, a)) - atan(sub(abbcbccd, a))
+  let dspin = atan(sub(v, cd))
+  let aspin = atan(sub(ab, v))
   if (Math.abs(aspin - dspin) > Math.PI) {
     if (aspin < dspin) aspin += Math.PI * 2
     else dspin += Math.PI * 2
   }
   const spin = bezier([aspin, dspin], t)
-  const abv = add(v, rot(sub(abbc, abbcbccd), spin))
-  const vcd = add(v, rot(sub(bccd, abbcbccd), spin))
+  // const spin = t > 0.5 ? dspin : aspin
+  const abdistance = distance(abbc, abbcbccd)
+  const addistance = distance(bccd, abbcbccd)
+  const abv = add(v, scale(unit(spin), abdistance))
+  const vcd = add(v, scale(unit(spin), -addistance))
   return [
-    curve(a, ab, abv, v, attributes),
-    curve(v, vcd, cd, d, attributes)
+    circle(abv, { r: 2, fill: 'green', stroke: 'none' }),
+    circle(vcd, { r: 2, fill: 'green', stroke: 'none' }),
+    line(abv, vcd, { fill: 'none', stroke: 'green', 'stroke-dasharray': '1' }),
+    circle(ab, { r: 2, fill: 'green', stroke: 'none' }),
+    line(ab, a, { fill: 'none', stroke: 'green', 'stroke-dasharray': '1' }),
+    circle(cd, { r: 2, fill: 'green', stroke: 'none' }),
+    line(cd, d, { fill: 'none', stroke: 'green', 'stroke-dasharray': '1' }),
+    curve(a, ab, abv, v, { fill: 'none', stroke: 'green' }),
+    curve(v, vcd, cd, d, { fill: 'none', stroke: 'green' })
   ]
 }
 const markers = (a, b, c, d, attributes) => el => toSteps(model.steps, t => circle(bezierP([a, b, c, d], t), attributes))
@@ -103,16 +117,16 @@ const showStringsChange = el => e => { model.showingStringArt = el.checked }
 const showSpineChange = el => e => { model.showingSpine = el.checked }
 
 render(document.body, h`
-  <svg width="100vw" height="100vh" style="display: block;" xmlns="http://www.w3.org/2000/svg">
+  <svg width="100vw" height="100vh" style="display: block; background: oldlace;" xmlns="http://www.w3.org/2000/svg">
     ${line(model.b, model.a, { stroke: 'red', 'stroke-dasharray': '0 10 10 0' })}
     ${line(model.c, model.d, { stroke: 'red', 'stroke-dasharray': '0 10 10 0' })}
-    ${stretchedCurve(model.a, model.b, model.c, model.d, model.v, { fill: 'none', stroke: 'green' })}
+    ${stretchedCurve(model.a, model.b, model.c, model.d, model.v)}
     ${showIfElse(() => model.showingStringArt, [
       markers(model.a, model.b, model.c, model.d, { r: 2, fill: 'none', stroke: '#ff000066' }),
       stringarts(model.a, model.b, model.c, model.d, { r: 2, fill: 'none', stroke: '#ff000033' })
     ])}
     ${showIfElse(() => model.showingSpine, [tLines(model.a, model.b, model.c, model.d, { stroke: '#00ffff88' })])}
-    ${draggableCircle(model.a, { r: 7, fill: 'black', stroke: 'none', 'pointer-events': 'all' })}
+    ${draggableCircle(model.a, { r: 7, fill: 'black', stroke: 'none', 'pointer-events': 'all', cursor: 'grab' })}
     ${draggableCircle(model.b, { r: 8, fill: 'none', stroke: 'black', 'pointer-events': 'all' })}
     ${draggableCircle(model.c, { r: 8, fill: 'none', stroke: 'black', 'pointer-events': 'all' })}
     ${draggableCircle(model.d, { r: 7, fill: 'black', stroke: 'none', 'pointer-events': 'all' })}
