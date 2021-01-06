@@ -1,6 +1,5 @@
 /* eslint-env browser */
-import { mapEntries } from '../1-t/horseless.0.5.1.min.esm.js'
-import { render, h, proxy, watchFunction } from './horseless.0.5.1.min.esm.js'
+import { render, h, proxy, watchFunction, mapEntries } from './horseless.0.5.1.min.esm.js'
 const model = window.model = proxy(localStorage.getItem('model') ? JSON.parse(localStorage.getItem('model')) : {
   points: [],
   steps: 1,
