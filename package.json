@@ -22,5 +22,10 @@
   "devDependencies": {
     "express": "^4.17.1",
     "standard": "^14.3.4"
+  },
+  "standard": {
+    "ignore": [
+      "*.min.esm.js"
+    ]
   }
 }

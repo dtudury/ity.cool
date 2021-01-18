@@ -17,6 +17,57 @@ navigator.mediaDevices.getUserMedia({ video: { width, height } }).then(stream =>
   })
 }, console.error)
 
+function edgeKernel () {
+  const gaussianFunctionFactory = s => {
+    const a = 1 / (2 * s ** 2)
+    const b = Math.sqrt(2 * Math.PI * s)
+    return d => Math.exp(-(d ** 2) * a) / b
+  }
+  const r = 7
+  const g1 = gaussianFunctionFactory(1)
+  const g2 = gaussianFunctionFactory(4)
+  let sum1 = 0
+  let sum2 = 0
+  const kernel1 = []
+  const kernel2 = []
+  for (let y = -r; y <= r; ++y) {
+    const row1 = kernel1[y] = []
+    const row2 = kernel2[y] = []
+    for (let x = -r; x <= r; ++x) {
+      const d = (x ** 2 + y ** 2) ** 0.5
+      const w1 = g1(d)
+      const w2 = g2(d)
+      sum1 += w1
+      sum2 += w2
+      row1[x] = w1
+      row2[x] = w2
+    }
+  }
+  // normalize and combine into texture string array
+  const textureStrings = []
+  let sum = 0
+  let abssum = 0
+  for (let y = -r; y <= r; ++y) {
+    for (let x = -r; x <= r; ++x) {
+      const c1 = 1 * kernel1[y][x] / sum1
+      const c2 = 2 * kernel2[y][x] / sum2
+      const combo = (c1 - c2)
+      textureStrings.push(`${combo.toFixed(8)} * texture2D(u_image, v_texCoord + vec2(${x / width}, ${y / height}))`)
+      kernel1[y][x] = combo
+      sum += combo
+      abssum += Math.abs(combo)
+    }
+  }
+  console.log(sum)
+  console.log(abssum)
+  console.log(kernel1)
+  console.log(kernel1.map(row => row.map(cell => cell.toFixed(8))).map(JSON.stringify).join('\n'))
+  // console.log(kernel2.map(row => row.map(cell => cell.toFixed(8))).map(JSON.stringify).join('\n'))
+  return textureStrings.join(' + ')
+}
+
+const ek = edgeKernel()
+
 function createAndUseImageProcessingProgram (gl) {
   const program = createProgram(
     gl,
@@ -25,10 +76,7 @@ function createAndUseImageProcessingProgram (gl) {
       attribute vec2 a_texCoord;
       varying vec2 v_texCoord;
       void main() {
-        vec2 zeroToOne = a_position / 150.0;
-        vec2 zeroToTwo = zeroToOne * 2.0;
-        vec2 clipSpace = zeroToTwo - 1.0;
-        gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+        gl_Position = vec4(a_texCoord * -2.0 + 1.0, 0, 1);
         v_texCoord = a_texCoord;
       }
   `), createShader(gl, gl.FRAGMENT_SHADER, `
@@ -36,23 +84,13 @@ function createAndUseImageProcessingProgram (gl) {
     uniform sampler2D u_image;
     varying vec2 v_texCoord;
     void main() {
-       gl_FragColor = texture2D(u_image, v_texCoord);
+       // gl_FragColor = texture2D(u_image, v_texCoord);
+       gl_FragColor = abs(${ek});
     }
   `)
   )
   gl.useProgram(program)
-  const positionLocation = gl.getAttribLocation(program, 'a_position')
   const texcoordLocation = gl.getAttribLocation(program, 'a_texCoord')
-  const positionBuffer = gl.createBuffer()
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-    width, 0,
-    0, 0,
-    width, height,
-    width, height,
-    0, 0,
-    0, height
-  ]), gl.STATIC_DRAW)
   const texcoordBuffer = gl.createBuffer()
   gl.bindBuffer(gl.ARRAY_BUFFER, texcoordBuffer)
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
@@ -73,9 +111,6 @@ function createAndUseImageProcessingProgram (gl) {
   gl.clearColor(0, 0, 0, 0)
   gl.clear(gl.COLOR_BUFFER_BIT)
   gl.useProgram(program)
-  gl.enableVertexAttribArray(positionLocation)
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
-  gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0)
   gl.enableVertexAttribArray(texcoordLocation)
   gl.bindBuffer(gl.ARRAY_BUFFER, texcoordBuffer)
   gl.vertexAttribPointer(texcoordLocation, 2, gl.FLOAT, false, 0, 0)
