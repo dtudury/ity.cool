@@ -49,9 +49,9 @@ function edgeKernel () {
   let abssum = 0
   for (let y = -r; y <= r; ++y) {
     for (let x = -r; x <= r; ++x) {
-      const c1 = 1 * kernel1[y][x] / sum1
-      const c2 = 2 * kernel2[y][x] / sum2
-      const combo = (c1 - c2)
+      const c1 = 1.1 * kernel1[y][x] / sum1
+      const c2 = 1 * kernel2[y][x] / sum2
+      const combo = (c1 - c2) * 10
       textureStrings.push(`${combo.toFixed(8)} * texture2D(u_image, v_texCoord + vec2(${x / width}, ${y / height}))`)
       kernel1[y][x] = combo
       sum += combo
