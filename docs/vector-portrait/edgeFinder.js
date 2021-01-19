@@ -62,7 +62,7 @@ export function createEdgeFinder (gl) {
     varying vec2 v_texCoord;
     void main() {
       vec4 pixel = vec4(${ek});
-      float v = 1.0 - (pixel.r + pixel.g + pixel.b) / 3.0;
+      float v = 1.0 - (0.212 * pixel.r + 0.701 * pixel.g + 0.087 * pixel.b);
       gl_FragColor = vec4(v, v, v, 1);
     }
   `)
