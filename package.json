@@ -25,7 +25,8 @@
   },
   "standard": {
     "ignore": [
-      "*.min.esm.js"
+      "*.min.esm.js",
+      "delaunator.4.0.1.js"
     ]
   }
 }

@@ -1,8 +1,8 @@
 import { createProgram, createShader } from './webglHelpers.js'
-import { edgeKernel, stringifyKernel } from './kernels.js'
+import { normalizedGaussianKernel, stringifyKernel } from './kernels.js'
 
-export function createEdgeFinder (gl, s1, s2, factor) {
-  const kernel = stringifyKernel(edgeKernel(s1, s2, factor))
+export function createBlurrer (gl, s) {
+  const kernel = stringifyKernel(normalizedGaussianKernel(s))
   const program = createProgram(
     gl,
     createShader(gl, gl.VERTEX_SHADER, `
@@ -19,8 +19,7 @@ export function createEdgeFinder (gl, s1, s2, factor) {
       varying vec2 v_texCoord;
       void main() {
         vec4 pixel = vec4(${kernel});
-        float v = 1.0 - (0.212 * pixel.r + 0.701 * pixel.g + 0.087 * pixel.b);
-        gl_FragColor = vec4(v, v, v, 1);
+        gl_FragColor = vec4(pixel.rgb, 1);
       }
     `)
   )
