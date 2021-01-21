@@ -30,14 +30,14 @@ navigator.mediaDevices.getUserMedia({ video: { width, height } }).then(stream =>
       const edgePixels = new Uint8Array(width * height * 4)
       // edge2PixelsWebglContext.readPixels(0, 0, width, height, edge2PixelsWebglContext.RGBA, edge2PixelsWebglContext.UNSIGNED_BYTE, edgePixels)
       edgePixelsWebglContext.readPixels(0, 0, width, height, edgePixelsWebglContext.RGBA, edgePixelsWebglContext.UNSIGNED_BYTE, edgePixels)
-      const points = pixelsToPoints(edgePixels, blurPixels)
-      triangler(points)
+      const points = pixelsToPoints(edgePixels)
+      triangler(points, blurPixels, width, height)
     }
     redraw()
   })
 }, console.error)
 
-function pixelsToPoints (edgeness, colors) {
+function pixelsToPoints (edgeness) {
   const buckets = Array(256)
   for (let v = 0; v < 256; ++v) {
     buckets[v] = []
@@ -49,19 +49,15 @@ function pixelsToPoints (edgeness, colors) {
     }
   }
   let points = [[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]]
-  for (let v = 0; v <= 200; ++v) {
+  for (let v = 0; v <= 220; ++v) {
     if (buckets[v].length) {
       points = [...points, ...buckets[v]]
     }
   }
   return points.map(([x, y]) => {
-    const i = 4 * (y * width + x)
     return [
       x / width * 2 - 1,
-      y / height * 2 - 1,
-      colors[i],
-      colors[i + 1],
-      colors[i + 2]
+      y / height * 2 - 1
     ]
   })
 }
