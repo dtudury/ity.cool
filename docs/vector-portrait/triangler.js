@@ -1,6 +1,5 @@
 import { createProgram, createShader } from './webglHelpers.js'
 import Delaunator from './delaunator.4.0.1.js'
-console.log(Delaunator)
 
 export function createTriangler (gl) {
   const program = createProgram(
@@ -53,7 +52,6 @@ export function createTriangler (gl) {
         pixels[rIndex + 1] / 255 + (Math.random() * 2 - 1) * noise,
         pixels[rIndex + 2] / 255 + (Math.random() * 2 - 1) * noise
       ]
-      // if (Math.random() * 10000 < 1) console.log(color)
       colors.push([color, color, color])
     }
     const fragColors = Float32Array.from(colors.flat(2))

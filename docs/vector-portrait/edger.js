@@ -19,7 +19,8 @@ export function createEdgeFinder (gl, s1, s2, factor) {
       varying vec2 v_texCoord;
       void main() {
         vec4 pixel = vec4(${kernel});
-        float v = 1.0 - (0.212 * pixel.r + 0.701 * pixel.g + 0.087 * pixel.b);
+        float v = 1.0 - (0.2627 * pixel.r + 0.6780 * pixel.g + 0.0593 * pixel.b);
+        // float v = 1.0 - (pixel.r + pixel.g + pixel.b) / 3.0;
         gl_FragColor = vec4(v, v, v, 1);
       }
     `)
@@ -48,7 +49,6 @@ export function createEdgeFinder (gl, s1, s2, factor) {
   gl.vertexAttribPointer(texcoordLocation, 2, gl.FLOAT, false, 0, 0)
 
   return image => {
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
     gl.drawArrays(gl.TRIANGLES, 0, 6)
   }

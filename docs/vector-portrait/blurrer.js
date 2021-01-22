@@ -48,7 +48,6 @@ export function createBlurrer (gl, s) {
 
   return image => {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
     gl.drawArrays(gl.TRIANGLES, 0, 6)
   }
 }

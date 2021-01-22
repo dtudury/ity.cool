@@ -1,4 +1,6 @@
-export const R = 8 // bigger than this leads to too complex webgl functions
+import { width, height } from './constants.js'
+
+const R = 8 // bigger than this leads to too complex webgl functions
 
 function gaussianKernel (s) {
   // precalculate couple of values for bell curve function
@@ -70,7 +72,9 @@ export function stringifyKernel (kernel) {
   for (let y = -R; y <= R; ++y) {
     for (let x = -R; x <= R; ++x) {
       if (Math.abs(kernel[y][x]) >= 0.0001) {
-        textureStrings.push(`${kernel[y][x].toFixed(4)} * texture2D(u_image, v_texCoord + vec2(${(x / 150).toFixed(4)}, ${(y / 150).toFixed(4)}))`)
+        const mappedX = x / width
+        const mappedY = y / height
+        textureStrings.push(`${kernel[y][x].toFixed(4)} * texture2D(u_image, v_texCoord + vec2(${mappedX.toFixed(4)}, ${mappedY.toFixed(4)}))`)
       }
     }
   }

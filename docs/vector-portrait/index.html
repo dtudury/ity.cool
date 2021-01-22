@@ -4,10 +4,20 @@
 
 <head>
     <meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body {
             margin: 0;
+        }
+
+        video,
+        canvas {
+            display: block;
+            width: 600px;
+            height: 600px;
+            position: sticky;
+            top: 0;
+            margin: 0 auto calc(100vh - 600px);
         }
     </style>
 </head>
@@ -16,8 +26,6 @@
     <video></video>
     <canvas id="blur-pixels" width="150" height="150"></canvas>
     <canvas id="edge-pixels" width="150" height="150"></canvas>
-    <canvas id="edge2-pixels" width="150" height="150"></canvas>
-    <br>
     <canvas id="triangulation-pixels" width="600" height="600"></canvas>
     <script type="module" src="main.js"></script>
 </body>
