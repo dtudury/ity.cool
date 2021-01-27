@@ -1,7 +1,7 @@
 import { createBlurrer } from './blurrer.js'
 import { createEdgeFinder } from './edger.js'
 import { createTriangler } from './triangler.js'
-import { width, height } from './constants.js'
+import { width, height, cellSize, threshold, sigma1, sigma2, cutoff } from './constants.js'
 
 navigator.mediaDevices.getUserMedia({ video: { width, height } }).then(stream => {
   const video = document.querySelector('video')
@@ -12,8 +12,8 @@ navigator.mediaDevices.getUserMedia({ video: { width, height } }).then(stream =>
     const edgePixelsCanvas = document.querySelector('#edge-pixels')
     const edgePixelsWebglContext = edgePixelsCanvas.getContext('webgl', { alpha: false, depth: false })
     const triangulationPixelsWebglContext = document.querySelector('#triangulation-pixels').getContext('webgl', { alpha: false, depth: false })
-    const updateBlur = createBlurrer(blurPixelsWebglContext, 0.5)
-    const updateEdges = createEdgeFinder(edgePixelsWebglContext, 0.5, 0.55, 1)
+    const updateBlur = createBlurrer(blurPixelsWebglContext, sigma1)
+    const updateEdges = createEdgeFinder(edgePixelsWebglContext, sigma1, sigma2, cutoff)
     const updateTriangles = createTriangler(triangulationPixelsWebglContext)
     const redraw = () => {
       window.requestAnimationFrame(redraw)
@@ -35,14 +35,25 @@ function pixelsToPoints (edgeness) {
   for (let v = 0; v < 256; ++v) {
     buckets[v] = []
   }
-  for (let y = 0; y < height; ++y) {
-    for (let x = 0; x < width; ++x) {
-      const v = edgeness[4 * (y * width + x)]
-      buckets[v].push([x, y])
+  for (let cellY = 0; cellY < height; cellY += cellSize) {
+    for (let cellX = 0; cellX < width; cellX += cellSize) {
+      let darkestV = Number.POSITIVE_INFINITY
+      let darkestXY
+      for (let y = cellY; y < cellY + cellSize; ++y) {
+        for (let x = cellX; x < cellX + cellSize; ++x) {
+          const index = 4 * (y * width + x)
+          const v = edgeness[index]
+          if (v < darkestV) {
+            darkestV = v
+            darkestXY = [x, y]
+          }
+        }
+      }
+      buckets[darkestV].push(darkestXY)
     }
   }
   let points = [[0, 0], [width, 0], [width, height], [0, height]]
-  for (let v = 0; v <= 220; ++v) {
+  for (let v = 0; v <= threshold; ++v) {
     if (buckets[v].length) {
       points = [...points, ...buckets[v]]
     }

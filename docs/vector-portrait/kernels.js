@@ -53,7 +53,7 @@ export function normalizedGaussianKernel (s) {
   return normalizeKernel(gaussianKernel(s))
 }
 
-export function edgeKernel (s1, s2, factor) {
+export function edgeKernel (s1, s2) {
   const kernel1 = normalizedGaussianKernel(s1)
   const kernel2 = normalizedGaussianKernel(s2)
   const kernel = []
@@ -63,7 +63,7 @@ export function edgeKernel (s1, s2, factor) {
       kernel[y][x] = (kernel2[y][x] - kernel1[y][x])
     }
   }
-  const temp = scaleKernel(kernel, factor / maxKernel(kernel))
+  const temp = scaleKernel(kernel, 1 / maxKernel(kernel))
   return temp
 }
 

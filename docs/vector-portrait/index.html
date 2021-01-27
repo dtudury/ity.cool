@@ -6,8 +6,21 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body {
-            margin: 0;
+        body {}
+
+        h2 {
+            position: sticky;
+            top: 0;
+        }
+
+        main {
+            width: 100%;
+        }
+
+        div {
+            width: 600px;
+            height: 100vh;
+            margin: 0 auto;
         }
 
         video,
@@ -15,18 +28,72 @@
             display: block;
             width: 600px;
             height: 600px;
-            position: sticky;
-            top: 0;
-            margin: 0 auto calc(100vh - 600px);
         }
     </style>
 </head>
 
 <body>
-    <video></video>
-    <canvas id="blur-pixels" width="150" height="150"></canvas>
-    <canvas id="edge-pixels" width="150" height="150"></canvas>
-    <canvas id="triangulation-pixels" width="600" height="600"></canvas>
+    <main>
+        <div>
+            <h2>step 0: image source
+                <video></video>
+            </h2>
+        </div>
+        <div>
+            <h2>step 1: blurred image to smooth color noise
+                <canvas id="blur-pixels" width="600" height="600"></canvas>
+            </h2>
+        </div>
+        <div>
+            <h2>step 2: difference of differently blurred images (edges)
+                <canvas id="edge-pixels" width="600" height="600"></canvas>
+            </h2>
+        </div>
+        <div>
+            <h2>final step: delaunay triangulation of edge points filled with smoothed color
+                <canvas id="triangulation-pixels" width="600" height="600"></canvas>
+            </h2>
+        </div>
+        <div>
+            <h2>Links</h2>
+            <ul>
+                <li>
+                    <a href="https://github.com/dtudury/ity.cool/tree/master/docs/vector-portrait">how the sausage is
+                        made</a> (source for this page)
+                </li>
+                <li>
+                    <a href="https://github.com/lizzthabet/speculative-camouflage">the proverbial butterfly flapping
+                        it's wings</a> (Lizz's project that exposed me to this branch of Mathematics. Thanks Lizz!)
+                </li>
+                <li>
+                    <a href="https://en.wikipedia.org/wiki/K-means_clustering">math is hard</a> (wikipedia: k-means clustering)
+                </li>
+                <li>
+                    <a href="https://en.wikipedia.org/wiki/Voronoi_diagram">math is science</a> (wikipedia: voronoi diagram)
+                </li>
+                <li>
+                    <a href="https://www.jonathanpuckey.com/projects/delaunay-raster/">math is art</a> (a manually
+                    created version of what I automated. Thanks Tim!)
+                </li>
+                <li>
+                    <a href="https://en.wikipedia.org/wiki/Delaunay_triangulation">CS theory is hard</a> (wikipedia: Delaunay
+                    triangulation)
+                </li>
+                <li>
+                    <a href="https://github.com/mapbox/delaunator">CS engineering is easy</a> (Delaunay triangulation
+                    library)
+                </li>
+                <li>
+                    <a href="https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm">more CS
+                        theory</a> (wikipedia: Ramer Douglas Peucker algorithm. Thanks Darius!)
+                </li>
+                <li>
+                    <a href="https://github.com/mourner/simplify-js">more CS engineering</a> (polygon simplification
+                    library)
+                </li>
+            </ul>
+        </div>
+    </main>
     <script type="module" src="main.js"></script>
 </body>
 
