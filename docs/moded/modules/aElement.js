@@ -1,4 +1,4 @@
-import { render, h } from '../horseless.0.5.2.min.esm.js' // '/unpkg/horseless/horseless.js'
+import { render, h } from '../horseless.0.5.3.min.esm.js' // '/unpkg/horseless/horseless.js'
 
 class AElement extends window.HTMLDivElement {
   constructor () {
