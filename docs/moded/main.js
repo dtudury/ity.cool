@@ -27,7 +27,12 @@ render(
   h`
   <${A_ELEMENT}/>
   <${B_ELEMENT} o=${{ a: 1, b: 2 }}>
-    w <b>x</b> h: ${() => model.dimensions.width} <b>x</b> ${() => model.dimensions.height}
+    w <b>x</b> h: ${() => model.dimensions.width} <b>x</b> ${() =>
+    model.dimensions.height}
   </closing-tag-name-ignored?!>
 `
 );
+
+model.x = null
+model.arr = [];
+model.arr.push({ a: null });

@@ -1,0 +1,733 @@
+{
+  "0": [
+    {
+      "from_state": 0,
+      "to_state": 31,
+      "word": 0,
+      "graph_cost": 15.3578,
+      "acoustic_cost": -187.059,
+      "transitions": [
+        {
+          "phone": "sil",
+          "length": 16
+        }
+      ]
+    },
+    {
+      "from_state": 0,
+      "to_state": 30,
+      "word": "<unk>",
+      "graph_cost": 19.5199,
+      "acoustic_cost": -188.6,
+      "transitions": [
+        {
+          "phone": "oov_S",
+          "length": 1
+        }
+      ]
+    },
+    {
+      "from_state": 0,
+      "to_state": 1,
+      "word": "<unk>",
+      "graph_cost": 20.7172,
+      "acoustic_cost": -187.16,
+      "transitions": [
+        {
+          "phone": "oov_S",
+          "length": 1
+        }
+      ]
+    }
+  ],
+  "1": [
+    {
+      "from_state": 1,
+      "to_state": 2,
+      "word": 0,
+      "graph_cost": 0.0,
+      "acoustic_cost": 0.0,
+      "transitions": [
+        {
+          "phone": "sil",
+          "length": 14
+        }
+      ]
+    }
+  ],
+  "2": [
+    {
+      "from_state": 2,
+      "to_state": 3,
+      "word": "<unk>",
+      "graph_cost": 0.0,
+      "acoustic_cost": 0.0,
+      "transitions": [
+        {
+          "phone": "oov_S",
+          "length": 1
+        }
+      ]
+    }
+  ],
+  "3": [
+    {
+      "from_state": 3,
+      "to_state": 4,
+      "word": "aesthetically",
+      "graph_cost": 10.2309,
+      "acoustic_cost": -169.408,
+      "transitions": [
+        {
+          "phone": "eh_B",
+          "length": 7
+        },
+        {
+          "phone": "s_I",
+          "length": 1
+        },
+        {
+          "phone": "th_I",
+          "length": 17
+        },
+        {
+          "phone": "eh_I",
+          "length": 6
+        },
+        {
+          "phone": "t_I",
+          "length": 6
+        },
+        {
+          "phone": "ih_I",
+          "length": 7
+        },
+        {
+          "phone": "k_I",
+          "length": 9
+        },
+        {
+          "phone": "l_I",
+          "length": 8
+        },
+        {
+          "phone": "iy_E",
+          "length": 9
+        }
+      ]
+    }
+  ],
+  "4": [
+    {
+      "from_state": 4,
+      "to_state": 5,
+      "word": "she",
+      "graph_cost": 0.0,
+      "acoustic_cost": 0.0,
+      "transitions": [
+        {
+          "phone": "sh_B",
+          "length": 10
+        },
+        {
+          "phone": "iy_E",
+          "length": 8
+        }
+      ]
+    }
+  ],
+  "5": [
+    {
+      "from_state": 5,
+      "to_state": 6,
+      "word": "reduced",
+      "graph_cost": 6.16149,
+      "acoustic_cost": -66.8634,
+      "transitions": [
+        {
+          "phone": "r_B",
+          "length": 7
+        },
+        {
+          "phone": "ih_I",
+          "length": 8
+        },
+        {
+          "phone": "d_I",
+          "length": 12
+        },
+        {
+          "phone": "uw_I",
+          "length": 13
+        },
+        {
+          "phone": "s_I",
+          "length": 8
+        },
+        {
+          "phone": "t_E",
+          "length": 10
+        }
+      ]
+    }
+  ],
+  "6": [
+    {
+      "from_state": 6,
+      "to_state": 7,
+      "word": 0,
+      "graph_cost": 0.0,
+      "acoustic_cost": 0.0,
+      "transitions": [
+        {
+          "phone": "sil",
+          "length": 1
+        }
+      ]
+    }
+  ],
+  "7": [
+    {
+      "from_state": 7,
+      "to_state": 8,
+      "word": "my",
+      "graph_cost": 8.02333,
+      "acoustic_cost": -83.2045,
+      "transitions": [
+        {
+          "phone": "m_B",
+          "length": 15
+        },
+        {
+          "phone": "ay_E",
+          "length": 16
+        }
+      ]
+    }
+  ],
+  "8": [
+    {
+      "from_state": 8,
+      "to_state": 9,
+      "word": 0,
+      "graph_cost": 0.0,
+      "acoustic_cost": 0.0,
+      "transitions": [
+        {
+          "phone": "sil",
+          "length": 1
+        }
+      ]
+    }
+  ],
+  "9": [
+    {
+      "from_state": 9,
+      "to_state": 10,
+      "word": "voice",
+      "graph_cost": 9.1926,
+      "acoustic_cost": -54.9182,
+      "transitions": [
+        {
+          "phone": "v_B",
+          "length": 11
+        },
+        {
+          "phone": "oy_I",
+          "length": 23
+        },
+        {
+          "phone": "s_E",
+          "length": 17
+        }
+      ]
+    }
+  ],
+  "10": [
+    {
+      "from_state": 10,
+      "to_state": 11,
+      "word": 0,
+      "graph_cost": 0.0,
+      "acoustic_cost": 0.0,
+      "transitions": [
+        {
+          "phone": "sil",
+          "length": 6
+        }
+      ]
+    }
+  ],
+  "11": [
+    {
+      "from_state": 11,
+      "to_state": 12,
+      "word": "to",
+      "graph_cost": 13.5237,
+      "acoustic_cost": -206.275,
+      "transitions": [
+        {
+          "phone": "t_B",
+          "length": 10
+        },
+        {
+          "phone": "uw_E",
+          "length": 10
+        }
+      ]
+    }
+  ],
+  "12": [
+    {
+      "from_state": 12,
+      "to_state": 13,
+      "word": "a",
+      "graph_cost": 0.0,
+      "acoustic_cost": 0.0,
+      "transitions": [
+        {
+          "phone": "ah_S",
+          "length": 16
+        }
+      ]
+    }
+  ],
+  "13": [
+    {
+      "from_state": 13,
+      "to_state": 14,
+      "word": 0,
+      "graph_cost": 0.0,
+      "acoustic_cost": 0.0,
+      "transitions": [
+        {
+          "phone": "sil",
+          "length": 20
+        }
+      ]
+    }
+  ],
+  "14": [
+    {
+      "from_state": 14,
+      "to_state": 15,
+      "word": "decorative",
+      "graph_cost": 8.47718,
+      "acoustic_cost": -180.916,
+      "transitions": [
+        {
+          "phone": "d_B",
+          "length": 11
+        },
+        {
+          "phone": "eh_I",
+          "length": 14
+        },
+        {
+          "phone": "k_I",
+          "length": 6
+        },
+        {
+          "phone": "r_I",
+          "length": 5
+        },
+        {
+          "phone": "ah_I",
+          "length": 5
+        },
+        {
+          "phone": "t_I",
+          "length": 2
+        },
+        {
+          "phone": "ih_I",
+          "length": 15
+        },
+        {
+          "phone": "v_E",
+          "length": 12
+        }
+      ]
+    }
+  ],
+  "15": [
+    {
+      "from_state": 15,
+      "to_state": 16,
+      "word": 0,
+      "graph_cost": 0.0,
+      "acoustic_cost": 0.0,
+      "transitions": [
+        {
+          "phone": "sil",
+          "length": 31
+        }
+      ]
+    }
+  ],
+  "16": [
+    {
+      "from_state": 16,
+      "to_state": 17,
+      "word": "cheap",
+      "graph_cost": 8.25981,
+      "acoustic_cost": -118.904,
+      "transitions": [
+        {
+          "phone": "ch_B",
+          "length": 19
+        },
+        {
+          "phone": "iy_I",
+          "length": 9
+        },
+        {
+          "phone": "p_E",
+          "length": 9
+        }
+      ]
+    }
+  ],
+  "17": [
+    {
+      "from_state": 17,
+      "to_state": 18,
+      "word": 0,
+      "graph_cost": 0.0,
+      "acoustic_cost": 0.0,
+      "transitions": [
+        {
+          "phone": "sil",
+          "length": 6
+        }
+      ]
+    }
+  ],
+  "18": [
+    {
+      "from_state": 18,
+      "to_state": 19,
+      "word": "object",
+      "graph_cost": 9.83908,
+      "acoustic_cost": -87.7934,
+      "transitions": [
+        {
+          "phone": "aa_B",
+          "length": 16
+        },
+        {
+          "phone": "b_I",
+          "length": 8
+        },
+        {
+          "phone": "jh_I",
+          "length": 8
+        },
+        {
+          "phone": "eh_I",
+          "length": 10
+        },
+        {
+          "phone": "k_I",
+          "length": 4
+        },
+        {
+          "phone": "t_E",
+          "length": 12
+        }
+      ]
+    }
+  ],
+  "19": [
+    {
+      "from_state": 19,
+      "to_state": 20,
+      "word": "i",
+      "graph_cost": 0.0,
+      "acoustic_cost": 0.0,
+      "transitions": [
+        {
+          "phone": "ay_S",
+          "length": 7
+        }
+      ]
+    }
+  ],
+  "20": [
+    {
+      "from_state": 20,
+      "to_state": 21,
+      "word": "could",
+      "graph_cost": 3.90183,
+      "acoustic_cost": -82.4792,
+      "transitions": [
+        {
+          "phone": "k_B",
+          "length": 7
+        },
+        {
+          "phone": "uh_I",
+          "length": 6
+        },
+        {
+          "phone": "d_E",
+          "length": 2
+        }
+      ]
+    }
+  ],
+  "21": [
+    {
+      "from_state": 21,
+      "to_state": 22,
+      "word": 0,
+      "graph_cost": 0.0,
+      "acoustic_cost": 0.0,
+      "transitions": [
+        {
+          "phone": "sil",
+          "length": 1
+        }
+      ]
+    }
+  ],
+  "22": [
+    {
+      "from_state": 22,
+      "to_state": 23,
+      "word": "go",
+      "graph_cost": 0.0,
+      "acoustic_cost": 0.0,
+      "transitions": [
+        {
+          "phone": "g_B",
+          "length": 8
+        },
+        {
+          "phone": "ow_E",
+          "length": 11
+        }
+      ]
+    }
+  ],
+  "23": [
+    {
+      "from_state": 23,
+      "to_state": 24,
+      "word": "pick",
+      "graph_cost": 10.7053,
+      "acoustic_cost": -91.2097,
+      "transitions": [
+        {
+          "phone": "p_B",
+          "length": 8
+        },
+        {
+          "phone": "ih_I",
+          "length": 8
+        },
+        {
+          "phone": "k_E",
+          "length": 5
+        }
+      ]
+    }
+  ],
+  "24": [
+    {
+      "from_state": 24,
+      "to_state": 25,
+      "word": "up",
+      "graph_cost": 0.0,
+      "acoustic_cost": 0.0,
+      "transitions": [
+        {
+          "phone": "ah_B",
+          "length": 11
+        },
+        {
+          "phone": "p_E",
+          "length": 7
+        }
+      ]
+    }
+  ],
+  "25": [
+    {
+      "from_state": 25,
+      "to_state": 26,
+      "word": 0,
+      "graph_cost": 0.0,
+      "acoustic_cost": 0.0,
+      "transitions": [
+        {
+          "phone": "sil",
+          "length": 7
+        }
+      ]
+    }
+  ],
+  "26": [
+    {
+      "from_state": 26,
+      "to_state": 27,
+      "word": "in",
+      "graph_cost": 5.6737,
+      "acoustic_cost": -117.324,
+      "transitions": [
+        {
+          "phone": "ih_B",
+          "length": 10
+        },
+        {
+          "phone": "n_E",
+          "length": 6
+        }
+      ]
+    }
+  ],
+  "27": [
+    {
+      "from_state": 27,
+      "to_state": 29,
+      "word": "chinatown",
+      "graph_cost": 1.25586,
+      "acoustic_cost": 1.70251,
+      "transitions": [
+        {
+          "phone": "ch_B",
+          "length": 9
+        },
+        {
+          "phone": "ay_I",
+          "length": 13
+        },
+        {
+          "phone": "n_I",
+          "length": 4
+        },
+        {
+          "phone": "ah_I",
+          "length": 6
+        },
+        {
+          "phone": "t_I",
+          "length": 9
+        },
+        {
+          "phone": "aw_I",
+          "length": 16
+        },
+        {
+          "phone": "n_E",
+          "length": 1
+        }
+      ]
+    },
+    {
+      "from_state": 27,
+      "to_state": 28,
+      "word": "chinatown",
+      "graph_cost": 0.0,
+      "acoustic_cost": 0.0,
+      "transitions": [
+        {
+          "phone": "ch_B",
+          "length": 9
+        },
+        {
+          "phone": "ay_I",
+          "length": 13
+        },
+        {
+          "phone": "n_I",
+          "length": 4
+        },
+        {
+          "phone": "ah_I",
+          "length": 6
+        },
+        {
+          "phone": "t_I",
+          "length": 9
+        },
+        {
+          "phone": "aw_I",
+          "length": 17
+        }
+      ]
+    }
+  ],
+  "28": [
+    {
+      "from_state": 28
+    }
+  ],
+  "29": [
+    {
+      "from_state": 29
+    }
+  ],
+  "30": [
+    {
+      "from_state": 30,
+      "to_state": 31,
+      "word": 0,
+      "graph_cost": 0.0,
+      "acoustic_cost": 0.0,
+      "transitions": [
+        {
+          "phone": "sil",
+          "length": 15
+        }
+      ]
+    }
+  ],
+  "31": [
+    {
+      "from_state": 31,
+      "to_state": 4,
+      "word": "aesthetically",
+      "graph_cost": 10.2309,
+      "acoustic_cost": -169.408,
+      "transitions": [
+        {
+          "phone": "eh_B",
+          "length": 7
+        },
+        {
+          "phone": "s_I",
+          "length": 1
+        },
+        {
+          "phone": "th_I",
+          "length": 17
+        },
+        {
+          "phone": "eh_I",
+          "length": 6
+        },
+        {
+          "phone": "t_I",
+          "length": 6
+        },
+        {
+          "phone": "ih_I",
+          "length": 7
+        },
+        {
+          "phone": "k_I",
+          "length": 9
+        },
+        {
+          "phone": "l_I",
+          "length": 8
+        },
+        {
+          "phone": "iy_E",
+          "length": 9
+        }
+      ]
+    }
+  ]
+}
