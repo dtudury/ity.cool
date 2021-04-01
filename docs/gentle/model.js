@@ -1,9 +1,47 @@
 import { proxy } from "./horseless.0.5.3.min.esm.js"; // '/unpkg/horseless/horseless.js'
 
+const edgeToString = edge => {
+  return JSON.stringify(edge.transitions) + edge.word || "";
+  return (
+    JSON.stringify(
+      (edge.transitions || []).map(({ phone }) => phone.split("_")[0])
+    ) + (edge.word || "")
+  );
+  /*
+  const edgeCopy = JSON.parse(JSON.stringify(edge));
+  delete edgeCopy.from_state;
+  return JSON.stringify(edgeCopy.transitions);
+  */
+};
+
 export const model = (window.model = proxy());
 (async () => {
   const lat = await (await fetch("lat.json")).json();
+  const edges = [];
   lat.forEach(({ lattice }) => {
+    for (const i in lattice) {
+      for (const edge of lattice[i]) {
+        edges.push(edgeToString(edge));
+      }
+    }
+  });
+  console.log(new Set(edges));
+  /*
+  edges.sort();
+  let dup = 0;
+  let prev;
+  edges.forEach(edge => {
+    if (edge !== prev) console.log(edge);
+    if (edge === prev) ++dup;
+    prev = edge;
+  });
+  */
+  // console.log(edges.length, dup);
+  /*
+  model.nodesByTime = [];
+  console.log(lat);
+  lat.forEach(({ lattice }) => {
+    // console.log(lattice)
     const graph = [];
     for (const i in lattice) {
       const edges = lattice[i];
@@ -22,15 +60,17 @@ export const model = (window.model = proxy());
       }
     }
     calculateTimes(0, graph);
-    console.log(graph);
+    // console.log(graph);
     const nodesByTime = {};
     graph.forEach(node => {
       const t = node.t;
       nodesByTime[t] = nodesByTime[t] || [];
       nodesByTime[t].push(node);
     });
+    model.nodesByTime.push(nodesByTime);
     console.log(nodesByTime);
   });
+  */
 })();
 
 const calculateTimes = (t, graph, index = 0) => {
