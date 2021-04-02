@@ -1,6 +1,6 @@
 import { proxy } from "./horseless.0.5.3.min.esm.js"; // '/unpkg/horseless/horseless.js'
 
-export const model = (window.model = proxy({ offsetT: 0 }));
+export const model = (window.model = proxy({ offsetT: 0, yOverflow: 10 }));
 
 const phonemes = new Set();
 const edgeToString = edge => {
@@ -12,22 +12,33 @@ const edgeToString = edge => {
   });
 };
 
-(async () => {
-  const lat = await (await fetch("lat.json")).json();
-  let maxT = 0;
-  let maxDt = 0;
-  const edges = [];
-  const edgesByTime = {};
-  let latticeIndex = 0;
-  lat.forEach(({ lattice }) => {
+const buildFromHash = async () => {
+  let parsedHash;
+  try {
+    parsedHash = JSON.parse(unescape(location.hash.substr(1)));
+  } catch (e) {
+    console.error(e);
+  }
+  if (
+    !parsedHash ||
+    !parsedHash.length ||
+    !parsedHash.every(element => typeof element === "string")
+  ) {
+    parsedHash = ["./demo/gentle-lattice.json", "./demo/kaldi-lattice.json"];
+  }
+  model.files = {};
+  for (const jsonUrl of parsedHash) {
+    const lattice = await (await fetch(jsonUrl)).json();
+    let maxT = 0;
+    let maxDt = 0;
+    const edges = [];
+    const edgesByTime = {};
     const duration = edge =>
       (edge.transitions || []).reduce((a, { length }) => a + length, 0);
     const edgesByFrom = {};
-    // const edgesByTo = {};
     for (const i in lattice) {
       for (const edge of lattice[i]) {
         const edgeIndex = edges.length;
-        edge.latticeIndex = latticeIndex;
         edge.dt = duration(edge);
         maxDt = Math.max(maxDt, edge.dt);
         edges.push(edge);
@@ -36,8 +47,6 @@ const edgeToString = edge => {
         if (toState != null && fromState != null) {
           edgesByFrom[fromState] = edgesByFrom[fromState] || [];
           edgesByFrom[fromState].push({ toState, edgeIndex });
-          // edgesByTo[toState] = edgesByTo[toState] || [];
-          // edgesByTo[toState].push({ fromState, edgeIndex });
         }
       }
     }
@@ -56,15 +65,13 @@ const edgeToString = edge => {
       });
     };
     calculateTimes(0, maxT);
-    ++latticeIndex;
-  });
-  console.log(edgesByTime);
-  model.edges = edges;
-  model.edgesByTime = edgesByTime;
-  model.maxT = maxT;
-  model.maxDt = maxDt;
+    model.files[jsonUrl] = {edges, edgesByTime, maxT, maxDt}
+  }
   // console.log([...phonemes].sort());
-})();
+};
+
+buildFromHash();
+window.onhashchange = buildFromHash;
 
 export const sortedPhonemes = [
   "aa",

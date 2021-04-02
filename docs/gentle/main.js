@@ -3,22 +3,23 @@ import { model } from "./model.js";
 const scale = 10;
 
 const lines = el => {
-  if (model.edgesByTime) {
-    const output = [];
+  const output = [];
+  const fileNames = Object.keys(model.files);
+  fileNames.forEach((fileName, index) => {
+    const offsetT = model.offsetT;
+    const { maxDt, edgesByTime } = model.files[fileName];
     const tWidth = window.innerWidth / scale;
-    const innerHeight = window.innerHeight;
-    for (const t in model.edgesByTime) {
-      if (t < model.offsetT + tWidth && t > model.offsetT - model.maxDt) {
-        const offsetT = t - model.offsetT;
-        const groups = model.edgesByTime[t];
+    for (const t in edgesByTime) {
+      if (t < offsetT + tWidth && t > offsetT - maxDt) {
+        const _offsetT = t - offsetT;
+        const groups = edgesByTime[t];
         let i = 0;
-        const stackHeight = Object.keys(groups).length;
         for (const groupString in groups) {
           const { transitions, word, dt } = JSON.parse(groupString);
-          const x = offsetT * scale;
-          const y = innerHeight * i / stackHeight
+          const x = _offsetT * scale;
+          const y = 17 * i + (window.innerHeight * index) / fileNames.length;
           const width = dt * scale;
-          const height = 20;
+          const height = 15;
           output.push(h`
             <rect x="${x}" y="${y}" width="${width}" height="${height}" fill="none" stroke="white"/>
             <text 
@@ -32,12 +33,17 @@ const lines = el => {
         }
       }
     }
-    return output;
-  }
+  });
+  return output;
 };
 
-document.onscroll = () => {
-  model.offsetT = window.scrollX / scale;
+const maxT = () => {
+  document.onscroll = () => (model.offsetT = window.scrollX / scale);
+  console.log(Object.values(model.files).map(({ maxT }) => maxT));
+  return scale *Object.values(model.files).reduce(
+    (acc, { maxT }) => Math.max(acc, maxT),
+    0
+  );
 };
 
 const styleElement = document.createElement("style");
@@ -47,7 +53,9 @@ render(
   h`
     body {
       margin: 0;
-      width: ${() => model.maxT * scale}px;
+      width: ${maxT}px;
+      height: calc(100vh + ${() => model.yOverflow}px);
+      overflow: scroll;
     }
     svg {
       position: fixed;
