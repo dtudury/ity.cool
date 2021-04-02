@@ -23,9 +23,12 @@ const lines = el => {
   const textoutput = [];
   const fileNames = Object.keys(model.files);
   const sectionHeight = model.innerHeight / fileNames.length;
-  const offsetT = model.offsetT;
+  let offsetT = model.offsetT;
+  if (model.isPlaying) {
+    offsetT = model.currentTime * 100;
+  }
   const scrollY = model.scrollY;
-  let isMoving = model.isMoving;
+  let isMoving = model.isMoving || model.isPlaying;
   fileNames.forEach((fileName, index) => {
     const y = index * sectionHeight;
     const { maxDt, edgesByTime } = model.files[fileName];
@@ -49,11 +52,17 @@ const lines = el => {
               model.selectedGroup = group;
               model.selectedIndex = index;
             };
+            const onclick = el => e => {
+              model.audio.currentTime = t / 100;
+              model.audio.play();
+              model.isPlaying = true;
+            };
             const y2 = p.y + height;
             const width = dt * scale;
             rectoutput.push(h`
               <rect 
                 onmouseover=${onmouseover}
+                onclick=${onclick}
                 x="${p.x}" 
                 y="${p.y}" 
                 width="${width}" 
@@ -172,6 +181,8 @@ window.onscroll = () => {
   model.scrollY = window.scrollY;
   model.isMoving = true;
   movingTimeout = setTimeout(() => (model.isMoving = false), 100);
+  model.audio.pause();
+  model.isPlaying = false;
 };
 window.onresize = () => {
   model.innerWidth = window.innerWidth;
@@ -235,3 +246,9 @@ document.body.onmouseover = () => {
   model.isMoving = true;
   movingTimeout = setTimeout(() => (model.isMoving = false), 300);
 };
+
+setInterval(() => {
+  if (model.audio) {
+    model.currentTime = model.audio.currentTime;
+  }
+});
