@@ -1,4 +1,4 @@
-import { render, h, mapEntries } from "./horseless.0.5.3.min.esm.js"; // '/unpkg/horseless/horseless.js'
+import { render, h } from "./horseless.0.5.3.min.esm.js"; // '/unpkg/horseless/horseless.js'
 import { model, sortedPhonemes } from "./model.js";
 const scale = 15;
 const height = 13;
@@ -40,13 +40,9 @@ const lines = el => {
           const p = toPoint(group.i, t);
           if (p.y > y && p.y < y + sectionHeight) {
             const onmouseover = el => e => {
+              e.stopImmediatePropagation();
               model.selectedGroup = group;
               model.selectedIndex = index;
-              el.onmouseout = () => {
-                model.selectedGroup = null;
-                model.selectedIndex = null;
-                el.onmouseout = null;
-              };
             };
             const y2 = p.y + height;
             const width = dt * scale;
@@ -84,6 +80,7 @@ const lines = el => {
                     height="${height}" 
                     fill="${color}" 
                     stroke="hsl(0, 0%, 90%)"
+                    style="pointer-events: none;"
                   />
                 `);
                 textoutput.push(h`
@@ -125,7 +122,7 @@ const lines = el => {
                 ${space(p2)}
                 ${space(p3)}
             "
-            stroke="hsla(0, 0%, 70%, 50%)"
+            stroke="hsla(0, 100%, 70%, 50%)"
             fill="none"
             style="pointer-events: none;"
           />
@@ -148,6 +145,7 @@ const lines = el => {
         height="${height * 2}" 
         fill="hsl(0, 0%, 80%)" 
         stroke="hsl(0, 0%, 70%)"
+        style="pointer-events: none;"
       />
       <text 
         x="10" 
@@ -155,6 +153,7 @@ const lines = el => {
         dominant-baseline="central"
         text-anchor="left"
         fill="hsl(0, 0%, 100%)"
+        style="pointer-events: none;"
       >${fileName}</text>
     `);
   });
@@ -224,3 +223,10 @@ render(
     without some text it won't scroll
   `
 );
+
+document.body.onmouseover = () => {
+  model.selectedGroup = null;
+  model.selectedIndex = null;
+  model.isMoving = true;
+  movingTimeout = setTimeout(() => (model.isMoving = false), 300);
+};
