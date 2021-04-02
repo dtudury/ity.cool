@@ -52,17 +52,23 @@ const lines = el => {
               model.selectedGroup = group;
               model.selectedIndex = index;
             };
-            const onclick = el => e => {
-              model.audio.currentTime = t / 100;
-              model.audio.play();
-              model.isPlaying = true;
+            const onmousedown = el => e => {
+              e.stopImmediatePropagation();
+              if (model.isPlaying) {
+                model.audio.pause();
+                model.isPlaying = false;
+              } else {
+                model.audio.currentTime = t / 100;
+                model.audio.play();
+                model.isPlaying = true;
+              }
             };
             const y2 = p.y + height;
             const width = dt * scale;
             rectoutput.push(h`
               <rect 
                 onmouseover=${onmouseover}
-                onclick=${onclick}
+                onmousedown=${onmousedown}
                 x="${p.x}" 
                 y="${p.y}" 
                 width="${width}" 
@@ -245,6 +251,10 @@ document.body.onmouseover = () => {
   model.selectedIndex = null;
   model.isMoving = true;
   movingTimeout = setTimeout(() => (model.isMoving = false), 300);
+};
+document.body.onmousedown = () => {
+  model.audio.pause();
+  model.isPlaying = false;
 };
 
 setInterval(() => {
