@@ -93,6 +93,10 @@ buildFromHash();
 window.onhashchange = buildFromHash;
 
 export const sortedPhonemes = [
+  "l",
+  "r",
+  "y",
+
   "aa",
   "ae",
   "ah",
@@ -133,10 +137,6 @@ export const sortedPhonemes = [
   "v",
   "w",
   "z",
-
-  "l",
-  "r",
-  "y"
 
   /*
   "noise",
