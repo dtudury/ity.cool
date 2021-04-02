@@ -1,6 +1,6 @@
 import { proxy } from "./horseless.0.5.3.min.esm.js"; // '/unpkg/horseless/horseless.js'
 
-export const model = (window.model = proxy({ offsetT: 0, yOverflow: 10 }));
+export const model = (window.model = proxy({ offsetT: 0, scrollY: 0, yOverflow: 0 }));
 
 const phonemes = new Set();
 const edgeToString = edge => {

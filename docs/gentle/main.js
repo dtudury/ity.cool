@@ -14,20 +14,13 @@ const phonemeToColor = phoneme => {
 const lines = el => {
   const output = [];
   const fileNames = Object.keys(model.files);
+  const sectionHeight = model.innerHeight / fileNames.length;
+  const offsetT = model.offsetT;
+  let isMoving = model.isMoving;
   fileNames.forEach((fileName, index) => {
-    const y = (window.innerHeight * index) / fileNames.length;
-    output.push(h`
-      <text 
-        x="10" 
-        y="${y + height}" 
-        dominant-baseline="middle"
-        text-anchor="left"
-        opacity="0.5"
-      >${fileName}</text>
-    `);
-    const offsetT = model.offsetT;
+    const y = index * sectionHeight;
     const { maxDt, edgesByTime } = model.files[fileName];
-    const tWidth = window.innerWidth / scale;
+    const tWidth = model.innerWidth / scale;
     for (const t in edgesByTime) {
       if (t < offsetT + tWidth && t > offsetT - maxDt) {
         const _offsetT = t - offsetT;
@@ -37,52 +30,80 @@ const lines = el => {
           const { transitions, word, dt } = JSON.parse(groupString);
           const x = _offsetT * scale;
           const y1 =
-            height * 2 * (1 + group.i) +
-            (window.innerHeight * index) / fileNames.length;
-          const y2 = y1 + height;
-          const width = dt * scale;
-          output.push(h`
-            <rect x="${x}" y="${y1}" width="${width}" height="${height}" fill="white" stroke="rgb(155, 155, 155)"/>
-            <text 
-              x="${x + width / 2}" 
-              y="${y1 + height / 2}" 
-              dominant-baseline="central"
-              text-anchor="middle"
-            >${word}</text>
-          `);
-          let phoneX = 0;
-          for (const { phone, length } of transitions) {
-            const shortPhone = phone.split("_")[0];
-            const color = phonemeToColor(shortPhone);
-            const width = length * scale;
+            -model.scrollY + height * 2 * (1 + group.i) + sectionHeight * index;
+          if (y1 > y) {
+            const y2 = y1 + height;
+            const width = dt * scale;
             output.push(h`
-              <rect 
-                x="${x + phoneX}" 
-                y="${y2}" 
-                width="${width}" 
-                height="${height}" 
-                fill="${color}" 
-                stroke="rgb(155, 155, 155)"
-              />
+              <rect x="${x}" y="${y1}" width="${width}" height="${height}" fill="white" stroke="rgb(155, 155, 155)"/>
               <text 
-                fill="rgba(255, 255, 255, 50%)"
-                x="${x + phoneX + width / 2}" 
-                y="${y2 + height / 2}" 
+                x="${x + width / 2}" 
+                y="${y1 + height / 2}" 
                 dominant-baseline="central"
                 text-anchor="middle"
-              >${shortPhone}</text>
+              >${word}</text>
             `);
-            phoneX += width;
+            if (!isMoving) {
+              let phoneX = 0;
+              for (const { phone, length } of transitions) {
+                const shortPhone = phone.split("_")[0];
+                const color = phonemeToColor(shortPhone);
+                const width = length * scale;
+                output.push(h`
+                  <rect 
+                    x="${x + phoneX}" 
+                    y="${y2}" 
+                    width="${width}" 
+                    height="${height}" 
+                    fill="${color}" 
+                    stroke="rgb(155, 155, 155)"
+                  />
+                  <text 
+                    fill="rgba(255, 255, 255, 50%)"
+                    x="${x + phoneX + width / 2}" 
+                    y="${y2 + height / 2}" 
+                    dominant-baseline="central"
+                    text-anchor="middle"
+                  >${shortPhone}</text>
+                `);
+                phoneX += width;
+              }
+            }
           }
         }
       }
     }
+    output.push(h`
+      <rect x="0" y="${y}" width="${model.innerWidth}" height="${
+      height * 2
+    }" fill="hsl(0, 0%, 80%)" stroke="rgb(155, 155, 155)"/>
+      <text 
+        x="10" 
+        y="${y + height}" 
+        dominant-baseline="central"
+        text-anchor="left"
+        fill="hsl(0, 0%, 100%)"
+      >${fileName}</text>
+    `);
   });
   return output;
 };
 
+let movingTimeout;
+window.onscroll = () => {
+  clearTimeout(movingTimeout);
+  model.offsetT = window.scrollX / scale;
+  model.scrollY = window.scrollY;
+  model.isMoving = true;
+  movingTimeout = setTimeout(() => (model.isMoving = false), 100);
+};
+window.onresize = () => {
+  model.innerWidth = window.innerWidth;
+  model.innerHeight = window.innerHeight;
+};
+window.onresize();
+
 const maxT = () => {
-  document.onscroll = () => (model.offsetT = window.scrollX / scale);
   return (
     scale *
     Object.values(model.files).reduce((acc, { maxT }) => Math.max(acc, maxT), 0)
