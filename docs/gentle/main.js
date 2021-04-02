@@ -3,7 +3,8 @@ import { model, sortedPhonemes } from "./model.js";
 const scale = 15;
 const height = 13;
 const phonemeToColor = phoneme => {
-  const index = sortedPhonemes.indexOf(phoneme);
+  const shortPhone = phoneme.split("_")[0].toLowerCase();
+  const index = sortedPhonemes.indexOf(shortPhone);
   if (index != -1) {
     const h = Math.floor((360 * index) / sortedPhonemes.length);
     return `hsl(${h}, 80%, 70%)`;
@@ -70,7 +71,7 @@ const lines = el => {
               let phoneX = 0;
               for (const { phone, length } of transitions) {
                 const shortPhone = phone.split("_")[0];
-                const color = phonemeToColor(shortPhone);
+                const color = phonemeToColor(phone);
                 const width = length * scale;
                 rectoutput.push(h`
                   <rect 

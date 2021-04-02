@@ -28,13 +28,25 @@ const buildFromHash = async () => {
   }
   if (
     !parsedHash ||
-    !parsedHash.length ||
-    !parsedHash.every(element => typeof element === "string")
+    !parsedHash.audio ||
+    !(typeof parsedHash.audio === "string") ||
+    !parsedHash.jsons ||
+    !parsedHash.jsons.length ||
+    !parsedHash.jsons.every(element => typeof element === "string")
   ) {
-    parsedHash = ["./demo/gentle-lattice.json", "./demo/kaldi-lattice.json"];
+    parsedHash = {
+      audio: "./demo/audio.wav",
+      jsons: ["./demo/gentle-lattice.json", "./demo/kaldi-lattice.json"]
+    };
   }
+  console.log(JSON.stringify(parsedHash));
+  if (model.audio) {
+    model.audio.pause();
+  }
+  model.audio = new Audio(parsedHash.audio);
+
   model.files = {};
-  for (const jsonUrl of parsedHash) {
+  for (const jsonUrl of parsedHash.jsons) {
     const lattice = await (await fetch(jsonUrl)).json();
     let maxT = 0;
     let maxDt = 0;
