@@ -16,6 +16,7 @@ const lines = el => {
   const fileNames = Object.keys(model.files);
   const sectionHeight = model.innerHeight / fileNames.length;
   const offsetT = model.offsetT;
+  const scrollY = model.scrollY;
   let isMoving = model.isMoving;
   fileNames.forEach((fileName, index) => {
     const y = index * sectionHeight;
@@ -30,8 +31,8 @@ const lines = el => {
           const { transitions, word, dt } = JSON.parse(groupString);
           const x = _offsetT * scale;
           const y1 =
-            -model.scrollY + height * 2 * (1 + group.i) + sectionHeight * index;
-          if (y1 > y) {
+            -scrollY + height * 2 * (1 + group.i) + sectionHeight * index;
+          if (y1 > y && y1 < y + sectionHeight) {
             const y2 = y1 + height;
             const width = dt * scale;
             output.push(h`
@@ -110,6 +111,18 @@ const maxT = () => {
   );
 };
 
+const maxH = () => {
+  const fileCount = Object.keys(model.files).length;
+  const sectionHeight = model.innerHeight / fileCount;
+  const maxmax =
+    2 +
+    Object.values(model.files).reduce(
+      (acc, { maxStack }) => Math.max(acc, maxStack),
+      0
+    );
+  return Math.max(0, maxmax * 2 * height - sectionHeight);
+};
+
 const styleElement = document.createElement("style");
 document.head.appendChild(styleElement);
 render(
@@ -118,7 +131,7 @@ render(
     body {
       margin: 0;
       width: ${maxT}px;
-      height: calc(100vh + ${() => model.yOverflow}px);
+      height: calc(100vh + ${maxH}px);
       overflow: scroll;
     }
     svg {

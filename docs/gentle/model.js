@@ -84,7 +84,7 @@ const buildFromHash = async () => {
         positions[i] = +time + group.dt;
       }
     }
-    model.files[jsonUrl] = { edges, edgesByTime, maxT, maxDt };
+    model.files[jsonUrl] = { edges, edgesByTime, maxT, maxDt, maxStack: positions.length };
   }
   // console.log([...phonemes].sort());
 };
