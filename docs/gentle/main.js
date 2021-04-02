@@ -3,7 +3,11 @@ import { model, sortedPhonemes } from "./model.js";
 const scale = 15;
 const height = 13;
 const phonemeToColor = phoneme => {
-  const shortPhone = phoneme.split("_")[0].toLowerCase();
+  let shortPhone = phoneme.split("_")[0].toLowerCase();
+  shortPhone = shortPhone
+    .split("")
+    .filter(c => !c.match(/\d/))
+    .join("");
   const index = sortedPhonemes.indexOf(shortPhone);
   if (index != -1) {
     const h = Math.floor((360 * index) / sortedPhonemes.length);
