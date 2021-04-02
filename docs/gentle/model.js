@@ -15,7 +15,10 @@ const edgeToString = edge => {
 const buildFromHash = async () => {
   let parsedHash;
   try {
-    parsedHash = JSON.parse(unescape(location.hash.substr(1)));
+    const hash = location.hash.substr(1);
+    if (hash) {
+      parsedHash = JSON.parse(unescape(hash));
+    }
   } catch (e) {
     console.error(e);
   }
@@ -53,19 +56,35 @@ const buildFromHash = async () => {
     const calculateTimes = (state, t) => {
       (edgesByFrom[state] || []).forEach(({ toState, edgeIndex }) => {
         edgesByTime[t] = edgesByTime[t] || {};
-        const edgeString = edgeToString(edges[edgeIndex]);
-        const group = (edgesByTime[t][edgeString] =
-          edgesByTime[t][edgeString] || []);
+        const str = edgeToString(edges[edgeIndex]);
         const dt = edges[edgeIndex].dt;
+        const group = (edgesByTime[t][str] = edgesByTime[t][str] || {
+          edges: [],
+          dt
+        });
         maxT = Math.max(maxT, t + dt);
-        if (!group.includes(edgeIndex)) {
-          group.push(edgeIndex);
+        if (!group.edges.includes(edgeIndex)) {
+          group.edges.push(edgeIndex);
           calculateTimes(toState, t + dt);
         }
       });
     };
     calculateTimes(0, maxT);
-    model.files[jsonUrl] = {edges, edgesByTime, maxT, maxDt}
+    const positions = [];
+    for (const time in edgesByTime) {
+      const getNextIndex = () => {
+        let i = 0;
+        while (positions[i] > time) ++i;
+        return i;
+      };
+      for (const str in edgesByTime[time]) {
+        const group = edgesByTime[time][str];
+        const i = getNextIndex();
+        group.i = i;
+        positions[i] = +time + group.dt;
+      }
+    }
+    model.files[jsonUrl] = { edges, edgesByTime, maxT, maxDt };
   }
   // console.log([...phonemes].sort());
 };
