@@ -31,14 +31,15 @@ export function getPathData(model) {
   const base = model.base % modulus
   const commands = []
   let prefix = 'M'
-  let step = 1
+  let firstStep = model.start || model.base
+  let step = firstStep
   let count = 0
   do {
     pushPoint()
     step = step * base % modulus
     prefix = 'L'
     ++count
-  } while (step !== 1 && count < (model.max || modulus))
+  } while (step !== firstStep && count < (model.max || modulus))
   pushPoint()
   return commands.join('') + ((step === base) ? '' : '')
 }

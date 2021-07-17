@@ -1,7 +1,7 @@
 import { createBlurrer } from './blurrer.js'
 import { createEdgeFinder } from './edger.js'
 import { createTriangler } from './triangler.js'
-import { width, height, cellSize, threshold, sigma1, sigma2, cutoff } from './constants.js'
+import { width, height, cellSize, threshold, sigma0, sigma1, sigma2, cutoff } from './constants.js'
 
 navigator.mediaDevices.getUserMedia({ video: { width, height } }).then(stream => {
   const video = document.querySelector('video')
@@ -12,7 +12,7 @@ navigator.mediaDevices.getUserMedia({ video: { width, height } }).then(stream =>
     const edgePixelsCanvas = document.querySelector('#edge-pixels')
     const edgePixelsWebglContext = edgePixelsCanvas.getContext('webgl', { alpha: false, depth: false })
     const triangulationPixelsWebglContext = document.querySelector('#triangulation-pixels').getContext('webgl', { alpha: false, depth: false })
-    const updateBlur = createBlurrer(blurPixelsWebglContext, sigma1)
+    const updateBlur = createBlurrer(blurPixelsWebglContext, sigma0)
     const updateEdges = createEdgeFinder(edgePixelsWebglContext, sigma1, sigma2, cutoff)
     const updateTriangles = createTriangler(triangulationPixelsWebglContext)
     const redraw = () => {
@@ -31,33 +31,39 @@ navigator.mediaDevices.getUserMedia({ video: { width, height } }).then(stream =>
 }, console.error)
 
 function pixelsToPoints (edgeness) {
-  const buckets = Array(256)
-  for (let v = 0; v < 256; ++v) {
-    buckets[v] = []
+  const toIndex = (x, y) => 4 * (y * width + x)
+  function hasNeighbor (x, y) {
+    return x === 0 || x === width - 1 || y === 0 || y === height - 1 ||
+      !edgeness[toIndex(x + 1, y)] ||
+      !edgeness[toIndex(x - 1, y)] ||
+      !edgeness[toIndex(x, y + 1)] ||
+      !edgeness[toIndex(x, y - 1)]
   }
-  for (let cellY = 0; cellY < height; cellY += cellSize) {
-    for (let cellX = 0; cellX < width; cellX += cellSize) {
-      let darkestV = Number.POSITIVE_INFINITY
-      let darkestXY
-      for (let y = cellY; y < cellY + cellSize; ++y) {
-        for (let x = cellX; x < cellX + cellSize; ++x) {
-          const index = 4 * (y * width + x)
-          const v = edgeness[index]
-          if (v < darkestV) {
-            darkestV = v
-            darkestXY = [x, y]
-          }
-        }
+  const field = []
+  function set (x, y, value) {
+    if (x < 0 || x >= width || y < 0 || y >= height) return false
+    field[y * width + x] = value
+    return true
+  }
+  function get (x, y) {
+    if (x < 0 || x >= width || y < 0 || y >= height) return false
+    return field[y * width + x]
+  }
+  const points = []
+  for (let y = 0; y < height; ++y) {
+    for (let x = 0; x < width; ++x) {
+      if (hasNeighbor(x, y)) {
+      // if (!edgeness[toIndex(x, y)]) {
+        points.push([x, y])
+        set(x, y, true)
       }
-      buckets[darkestV].push(darkestXY)
     }
   }
-  let points = [[0, 0], [width, 0], [width, height], [0, height]]
-  for (let v = 0; v <= threshold; ++v) {
-    if (buckets[v].length) {
-      points = [...points, ...buckets[v]]
+  points.forEach(([x, y]) => {
+    if (get(x, y)) {
+      walkFrom(x, y)
     }
-  }
+  })
   return points.map(([x, y]) => {
     return [
       x / (width - 1) * 2 - 1,
