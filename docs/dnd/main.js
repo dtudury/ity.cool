@@ -1,22 +1,18 @@
 /* eslint-env browser */
 import { Field } from './elements/Field.js'
-import { render, h, proxy, watchFunction } from './horseless.0.5.3.min.esm.js'
-
-const model = (window.model = proxy(
-  localStorage.getItem('dnd-model')
-    ? JSON.parse(localStorage.getItem('dnd-model'))
-    : {}
-))
-watchFunction(() => {
-  localStorage.setItem('dnd-model', JSON.stringify(model))
-})
+import { FieldAddButton } from './elements/FieldAddButton.js'
+import { render, h, mapEntries } from './horseless.0.5.3.min.esm.js'
+import { model } from './model.js'
 
 render(
   document.body,
   h`
-    <div draggable="true">
-      dnd experiment
-    </div>
-    <${Field} />
+    <${FieldAddButton} model=${model}/>
+    ${mapEntries(
+      () => model.data,
+      datum => {
+        return h`<${Field} datum=${datum}/>`
+      }
+    )}
   `
 )
