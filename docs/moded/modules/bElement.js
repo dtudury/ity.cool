@@ -1,10 +1,15 @@
-import { render, h } from "../horseless.0.5.3.min.esm.js"; // '/unpkg/horseless/horseless.js'
-import { model } from "../model.js";
+import { render, h, proxy } from '../horseless.0.5.3.min.esm.js' // '/unpkg/horseless/horseless.js'
+import { model } from '../model.js'
 
 class BElement extends window.HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: "open" });
+  static get observedAttributes () {
+    return ['v', 'w']
+  }
+
+  constructor () {
+    super()
+    this.model = proxy({})
+    this.attachShadow({ mode: 'open' })
     render(
       this.shadowRoot,
       h`
@@ -21,27 +26,40 @@ class BElement extends window.HTMLElement {
             border-radius: 20px;
           }
         </style>
+        ${() => this.model.v} ${() => this.model.w}
         <div ${this.getDivAttributes} ${(...args) => {
-          console.log("no this", args, this);
-        }}>slot here => <slot/></div>
+        // console.log('no this', args, this)
+      }}>slot here => <slot/></div>
         ${() => !!model.div}
       `
-    );
-    console.log(this.shadowRoot.querySelector("div"));
-    model.div = this.shadowRoot.querySelector("div");
+    )
+    // console.log(this.shadowRoot.querySelector('div'))
+    model.div = this.shadowRoot.querySelector('div')
   }
-  getDivAttributes(...args) {
-    console.log("this", args, this);
-    return [];
+
+  getDivAttributes (...args) {
+    // console.log('this', args, this)
+    return []
   }
-  connectedCallback() {}
+
+  attributeChangedCallback (name, oldValue, newValue) {
+    this.model[name] = newValue
+    // console.log('attributeChangedCallback', name, oldValue, '=>', newValue)
+  }
+  // connectedCallback () {}
 }
 
-const bElementName = "b-element";
-window.customElements.define(bElementName, BElement);
-const tieUps = new Map();
+export const bElementName = 'b-element'
+window.customElements.define(bElementName, BElement)
+const variants = new Map()
 export const B_ELEMENT = (attributes, children, description) => {
-  console.log(attributes, children)
-  if (!tieUps.has(description)) tieUps.set(description, h`<${bElementName}>${children}</>`);
-  return tieUps.get(description);
-};
+  if (!variants.has(description)) {
+    variants.set(
+      description,
+      h`<${bElementName} ${attributes}>${children}</>`[0]
+    )
+  }
+  console.log(variants.get(description))
+  setTimeout(() => {}, Math.random() * 1000 + 1000)
+  return variants.get(description)
+}

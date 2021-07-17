@@ -4,7 +4,9 @@ class AElement extends window.HTMLDivElement {
   constructor () {
     super()
     this.attachShadow({ mode: 'open' })
-    render(this.shadowRoot, h`
+    render(
+      this.shadowRoot,
+      h`
       <style>
         div {
           width: 100px;
@@ -13,17 +15,18 @@ class AElement extends window.HTMLDivElement {
         }
       </style>
       <div>asdf</div>
-    `)
-
+    `
+    )
   }
-  connectedCallback () {
-  }
+  // connectedCallback () {}
 }
 
 const aElementName = 'a-element'
 window.customElements.define(aElementName, AElement, { extends: 'div' })
 const tieUps = new Map()
 export const A_ELEMENT = (attributes, children, description) => {
-  if (!tieUps.has(description)) tieUps.set(description, h`<div is="${aElementName}"/>`)
+  if (!tieUps.has(description)) {
+    tieUps.set(description, h`<div is="${aElementName}"/>`)
+  }
   return tieUps.get(description)
 }
