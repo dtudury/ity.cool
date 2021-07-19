@@ -22,7 +22,20 @@ window.customElements.define(
       const color = () => (g > 127 ? 'black' : 'white')
       const background = randomHex() + cToHex(g) + randomHex()
       const onblur = el => event => {
-        this.datum.message = el.textContent
+        el.textContent = this.datum.message
+      }
+      const onkeydown = el => event => {
+        event.stopPropagation()
+        switch (event.key) {
+          case 'Enter':
+            this.datum.message = el.textContent
+            this.blur()
+            break
+          case 'Escape':
+            this.datum.message = el.textContent
+            this.blur()
+            break
+        }
       }
 
       render(
@@ -46,7 +59,8 @@ window.customElements.define(
             <span 
               contenteditable="true" 
               onblur=${onblur}
-              onclick=${onclick}>
+              onkeydown=${onkeydown}
+            >
               ${() => this?.datum?.message}
             </span>
           </div>

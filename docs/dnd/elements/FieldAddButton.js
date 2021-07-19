@@ -21,7 +21,7 @@ window.customElements.define(
               border: 1px solid pink;
             }
           </style>
-          <button>Add Field</div>
+          <button>Add Field</button>
         `
       )
     }
