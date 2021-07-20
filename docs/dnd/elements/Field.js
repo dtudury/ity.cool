@@ -1,5 +1,7 @@
 /* eslint-env browser */
 import { render, h } from '../horseless.0.5.3.min.esm.js'
+import { model } from '../model.js'
+import { EditableSpan } from './EditableSpan.js'
 
 export const Field = 'ity.cool-dnd-elements-field'
 
@@ -16,27 +18,39 @@ window.customElements.define(
     }
 
     connectedCallback () {
-      this.addEventListener('dragstart', () => {})
+      this.addEventListener('dragstart', event => {
+        model.dragging = this.datum
+        event.dataTransfer.dropEffect = 'none'
+      })
+      this.addEventListener('dragend', event => {
+        if (model.dragging === this.datum) {
+          delete model.dragging
+        }
+      })
+      this.addEventListener('drop', event => {
+        event.preventDefault()
+        console.log('drop', model.dragging, model.hovering, this.datum)
+      })
+      this.addEventListener('dragover', event => {
+        if (model.dragging !== this.datum) {
+          event.dataTransfer.dropEffect = 'move'
+          event.preventDefault()
+        } else {
+          event.dataTransfer.dropEffect = 'none'
+        }
+      })
+      this.addEventListener('dragenter', event => {
+        model.hovering = this.datum
+      })
+      this.addEventListener('dragleave', event => {
+        if (model.hovering === this.datum) {
+          delete model.hovering
+        }
+      })
 
       const g = randomC()
       const color = () => (g > 127 ? 'black' : 'white')
       const background = randomHex() + cToHex(g) + randomHex()
-      const onblur = el => event => {
-        el.textContent = this.datum.message
-      }
-      const onkeydown = el => event => {
-        event.stopPropagation()
-        switch (event.key) {
-          case 'Enter':
-            this.datum.message = el.textContent
-            this.blur()
-            break
-          case 'Escape':
-            this.datum.message = el.textContent
-            this.blur()
-            break
-        }
-      }
 
       render(
         this.shadowRoot,
@@ -56,13 +70,7 @@ window.customElements.define(
             }
           </style>
           <div draggable="true">
-            <span 
-              contenteditable="true" 
-              onblur=${onblur}
-              onkeydown=${onkeydown}
-            >
-              ${() => this?.datum?.message}
-            </span>
+            <${EditableSpan} datum=${this.datum}/>
           </div>
         `
       )

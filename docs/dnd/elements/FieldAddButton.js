@@ -31,7 +31,6 @@ window.customElements.define(
         if (!this.model) {
           return console.error('no model found for', this)
         }
-        this.model.data = this.model.data || []
         this.model.data.push({ message: 'hi - ' + Math.random() })
       })
     }
