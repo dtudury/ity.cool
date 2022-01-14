@@ -170,10 +170,7 @@ const model = (window.model = proxy({
 const processLineItem = lineItem => {
   const [before, after] = Object.entries(lineItem.vendors).reduce(
     ([before, after], [name, vendor]) => {
-      if (
-        !vendor.backorder &&
-        !isRFQ(model.requisition.vendors[name])
-      ) {
+      if (!vendor.backorder && !isRFQ(model.requisition.vendors[name])) {
         before.push({ name, ...vendor })
       } else {
         after.push({ name, ...vendor })
@@ -221,12 +218,19 @@ const buildRect = (vendor, offset, width, total) => {
     fill=${fill}
     stroke=${stroke}
     height="100%" 
-    stroke="white"
     stroke-width="2px"
     x="${offset}%" 
     width="${width}%"
   />`
 }
+
+const simpleRect = ({ confidence }) => h`<rect 
+    fill=${confidenceToColor(confidence, 0)}
+    stroke=${confidenceToColor(confidence, -1)}
+    height="100%" 
+    stroke-width="2px"
+    width="100%"
+  />`
 
 const agorameter = lineItem => el => {
   const { before, after, beforeSum, total } = processLineItem(lineItem)
@@ -275,7 +279,10 @@ const backorder = lineItem => {
   const onchange = el => e =>
     (lineItem.vendors[model.focus].backorder = el.checked)
   const isShown = () => !isRFQ(model.requisition.vendors[model.focus])
-  return showIfElse(isShown, h`<span class="backordered">backordered <input type="checkbox" onchange=${onchange} checked=${value}></span>`)
+  return showIfElse(
+    isShown,
+    h`<span class="backordered">backordered <input type="checkbox" onchange=${onchange} checked=${value}></span>`
+  )
 }
 
 const setThreadState = el => e => {
@@ -376,6 +383,11 @@ render(
       span.backordered {
         margin: 0 1rem;
       }
+      footer {
+        position: absolute;
+        bottom: 1rem;
+        left: 1rem;
+      }
     </style>
     <main>
       <h1>${() => model.requisition.id}</h1>
@@ -443,6 +455,18 @@ render(
         `
         )}
       </summary>
+      <footer>
+        ${Object.entries(threadStates).map(
+          ([name, threadState]) => h`
+            <div>
+              <svg width="50px" height="1rem" style="background: hsl(30, 20%, 60%);" xmlns="http://www.w3.org/2000/svg">
+                ${simpleRect(threadState)}
+              </svg>
+              ${threadState.title}
+            </div>
+          `
+        )}
+      </footer>
     </main>
   `
 )
