@@ -267,10 +267,17 @@ const blur = el => e => {
   model.hover = null
 }
 
-const quantity = lineItem => {
+const vendorQuantity = lineItem => {
   const value = el => lineItem.vendors[model.focus]?.quantity
   const oninput = el => e =>
     (lineItem.vendors[model.focus].quantity = +el.value)
+  return h`<input type="number" oninput=${oninput} value=${value}>`
+}
+
+const wantedQuantity = lineItem => {
+  const value = el => lineItem.quantity
+  const oninput = el => e =>
+    (lineItem.quantity = +el.value)
   return h`<input type="number" oninput=${oninput} value=${value}>`
 }
 
@@ -397,11 +404,14 @@ render(
             model.requisition.lineItems,
             lineItem => h`
               <article>
-                <h3>${lineItem.quantity} x ${lineItem.description}</h3>
+                <h3>${wantedQuantity(lineItem)} x ${lineItem.description}</h3>
                 <div class="meter-holder">
-                  <span class="needed-mark" style="right: ${offset(
-                    lineItem
-                  )}%;">needed by</span>
+                  <span 
+                      class="needed-mark" 
+                      style="right: 
+                      ${offset(lineItem)}%;">
+                    needed by
+                  </span>
                   <svg class="agorameter" width="100%" height="30px" style="display: block; background: hsl(30, 20%, 60%);" xmlns="http://www.w3.org/2000/svg">
                     ${agorameter(lineItem)}
                   </svg>
@@ -440,7 +450,7 @@ render(
                     h`
                       <article>
                         <h3>
-                          ${quantity(lineItem)} 
+                          ${vendorQuantity(lineItem)} 
                           x 
                           ${() => lineItem.description}
                         </h3> 
