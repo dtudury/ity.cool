@@ -1,5 +1,7 @@
 .DS_Store
 
+agorameter.query.js
+
 # Logs
 logs
 *.log
